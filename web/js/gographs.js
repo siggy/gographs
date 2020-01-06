@@ -1,3 +1,5 @@
+"use strict";
+
 function between(val, a, b) {
   if (a < b) {
     return Math.max(a, Math.min(val, b));
@@ -17,16 +19,19 @@ function updateThumbScope() {
   let scopeWidth = window.main.getSizes().width * thumbToMainZoomRatio;
   let scopeHeight = window.main.getSizes().height * thumbToMainZoomRatio;
 
-  scopeX = Math.max(0, scopeX);
-  scopeY = Math.max(0, scopeY);
+  scopeX = Math.max(0, scopeX) + 1;
+  scopeY = Math.max(0, scopeY) + 1;
+
   scopeWidth = Math.min(window.thumb.getSizes().width, scopeWidth);
   scopeHeight = Math.min(window.thumb.getSizes().height, scopeHeight);
+  scopeWidth = Math.max(0.1, scopeWidth-2);
+  scopeHeight = Math.max(0.1, scopeHeight-2);
 
   const scope = document.getElementById('scope');
-  scope.setAttribute('x', scopeX + 1);
-  scope.setAttribute('y', scopeY + 1);
-  scope.setAttribute('width', scopeWidth - 2);
-  scope.setAttribute('height', scopeHeight - 2);
+  scope.setAttribute('x', scopeX);
+  scope.setAttribute('y', scopeY);
+  scope.setAttribute('width', scopeWidth);
+  scope.setAttribute('height', scopeHeight);
 };
 
 function updateMainZoomPan(evt){
@@ -48,12 +53,19 @@ function updateMainZoomPan(evt){
 }
 
 function bindThumbnail(main, thumb){
-  if (!window.main && main) {
+  if (main) {
+    if (window.main) {
+      window.main.destroy();
+    }
     window.main = main;
   }
-  if (!window.thumb && thumb) {
+  if (thumb) {
+    if (window.thumb) {
+      window.thumb.destroy();
+    }
     window.thumb = thumb;
   }
+
   if (!window.main || !window.thumb) {
     return;
   }
@@ -106,6 +118,11 @@ document.getElementById('scope-container').addEventListener('load', function(){
 
 document.getElementById('main-svg').addEventListener('load', function(){
   const mainSvg = this.contentDocument.querySelector('svg');
+  if (!mainSvg) {
+    console.warn("failed to find svg");
+    return
+  }
+
   mainSvg.addEventListener(
     'wheel',
     function wheelZoom(e) {e.preventDefault()},
@@ -124,7 +141,6 @@ document.getElementById('main-svg').addEventListener('load', function(){
     };
   }
 
-  // Will get called after embed element was loaded
   const main = svgPanZoom(mainSvg, {
     viewportSelector: '#main-svg',
     panEnabled: true,
@@ -133,7 +149,7 @@ document.getElementById('main-svg').addEventListener('load', function(){
     dblClickZoomEnabled: true,
     mouseWheelZoomEnabled: true,
     preventMouseEventsDefault: false,
-    zoomScaleSensitivity: 0.1,
+    zoomScaleSensitivity: 0.2,
     minZoom: 1,
     maxZoom: 20,
     fit: true,
@@ -154,6 +170,11 @@ document.getElementById('main-svg').addEventListener('load', function(){
 
 document.getElementById('thumb-svg').addEventListener('load', function(){
   const thumbSvg = this.contentDocument.querySelector('svg');
+  if (!thumbSvg) {
+    console.warn("failed to find svg");
+    return
+  }
+
   thumbSvg.addEventListener(
     'wheel',
     function wheelZoom(e) {e.preventDefault()},
@@ -169,4 +190,28 @@ document.getElementById('thumb-svg').addEventListener('load', function(){
   });
 
   bindThumbnail(undefined, thumb);
+});
+
+window.addEventListener('load', (_) => {
+  const input = document.getElementById('input')
+
+  input.addEventListener("keyup", function(event) {
+    if (event.keyCode !== 13) {
+      return
+    }
+
+    const repo = "/repo/" + this.value + ".svg";
+    document.getElementById('main-svg').data = repo;
+    document.getElementById('thumb-svg').data = repo;
+  });
+
+  Array.from(document.getElementsByClassName("package-example")).forEach(
+    function(elm) {
+      elm.addEventListener('click', function(e) {
+        input.value = elm.text;
+        e.preventDefault();
+        return false;
+      });
+    }
+  );
 });

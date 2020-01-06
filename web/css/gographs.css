@@ -1,3 +1,10 @@
+.floating-panel {
+  z-index: 0;
+  position: absolute;
+  border: 2px solid rgba(210,225,240,1);
+  border-radius: 8px;
+}
+
 .main {
   z-index: -1;
   position: absolute;
@@ -8,18 +15,34 @@
 }
 
 .thumb {
-  z-index: 0;
-  position: absolute;
   bottom: 2%;
   left: 2%;
   height: 25%;
   width: auto;
-  border: 2px solid #e0ebf5;
-  border-radius: 8px;
 }
 
 #scope-container {
   z-index: 1;
-  background: rgba(0, 0, 0, 0);
   border: 2px solid rgba(0, 0, 0, 0);
+}
+
+
+/*
+ * control panel
+ */
+
+#control-panel {
+  top: 2%;
+  left: 2%;
+  height: 25%;
+  width: auto;
+  background: rgba(225,235,245,0.75);
+}
+
+.input {
+  color: #555;
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
