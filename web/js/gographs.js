@@ -23,10 +23,10 @@ function updateThumbScope() {
   scopeHeight = Math.min(window.thumb.getSizes().height, scopeHeight);
 
   const scope = document.getElementById('scope');
-  scope.setAttribute("x", scopeX + 1);
-  scope.setAttribute("y", scopeY + 1);
-  scope.setAttribute("width", scopeWidth - 2);
-  scope.setAttribute("height", scopeHeight - 2);
+  scope.setAttribute('x', scopeX + 1);
+  scope.setAttribute('y', scopeY + 1);
+  scope.setAttribute('width', scopeWidth - 2);
+  scope.setAttribute('height', scopeHeight - 2);
 };
 
 function updateMainZoomPan(evt){
@@ -35,7 +35,7 @@ function updateMainZoomPan(evt){
   }
 
   const dim = document.getElementById('thumb-svg').getBoundingClientRect();
-  const scopeDim = document.getElementById("scope").getBoundingClientRect();
+  const scopeDim = document.getElementById('scope').getBoundingClientRect();
 
   const mainToThumbZoomRatio =  window.main.getSizes().realZoom / window.thumb.getSizes().realZoom;
 
@@ -64,7 +64,7 @@ function bindThumbnail(main, thumb){
   const thumbSvg = document.getElementById('thumb-svg');
 
   window.addEventListener('resize', function(event){
-    scopeContainer.setAttribute("width", thumbSvg.getBoundingClientRect().width);
+    scopeContainer.setAttribute('width', thumbSvg.getBoundingClientRect().width);
 
     window.main.resize();
     window.thumb.resize();
@@ -74,9 +74,9 @@ function bindThumbnail(main, thumb){
   });
 
   // set scope-container to match size of thumbnail svg's 'width: auto'
-  scopeContainer.setAttribute("width", thumbSvg.getBoundingClientRect().width);
+  scopeContainer.setAttribute('width', thumbSvg.getBoundingClientRect().width);
 
-  // TODO: use document.getElementById('thumb-svg').contentDocument.querySelector("svg") ?
+  // TODO: use document.getElementById('thumb-svg').contentDocument.querySelector('svg') ?
   scopeContainer.addEventListener('click', function(evt){
     updateMainZoomPan(evt);
   });
@@ -96,18 +96,18 @@ function bindThumbnail(main, thumb){
   updateThumbScope();
 }
 
-document.getElementById("scope-container").addEventListener("load", function(){
+document.getElementById('scope-container').addEventListener('load', function(){
   this.addEventListener(
-    "wheel",
+    'wheel',
     function wheelZoom(e) {e.preventDefault()},
     { passive: false }
   );
 });
 
 document.getElementById('main-svg').addEventListener('load', function(){
-  const mainSvg = this.contentDocument.querySelector("svg");
+  const mainSvg = this.contentDocument.querySelector('svg');
   mainSvg.addEventListener(
-    "wheel",
+    'wheel',
     function wheelZoom(e) {e.preventDefault()},
     { passive: false }
   );
@@ -126,7 +126,7 @@ document.getElementById('main-svg').addEventListener('load', function(){
 
   // Will get called after embed element was loaded
   const main = svgPanZoom(mainSvg, {
-    viewportSelector: "#main-svg",
+    viewportSelector: '#main-svg',
     panEnabled: true,
     controlIconsEnabled: false,
     zoomEnabled: true,
@@ -153,9 +153,9 @@ document.getElementById('main-svg').addEventListener('load', function(){
 })
 
 document.getElementById('thumb-svg').addEventListener('load', function(){
-  const thumbSvg = this.contentDocument.querySelector("svg");
+  const thumbSvg = this.contentDocument.querySelector('svg');
   thumbSvg.addEventListener(
-    "wheel",
+    'wheel',
     function wheelZoom(e) {e.preventDefault()},
     { passive: false }
   );
