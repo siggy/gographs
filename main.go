@@ -53,6 +53,11 @@ func main() {
 }
 
 func repoHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet && r.Method != http.MethodPut {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
 	svg, ok := repoCache.Get(r.URL.String())
 	if !ok {
 		route := mux.CurrentRoute(r)
@@ -74,9 +79,20 @@ func repoHandler(w http.ResponseWriter, r *http.Request) {
 		repoCache.Set(r.URL.String(), svg)
 	}
 
-	w.Header().Set("Content-Type", "image/svg+xml")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(svg))
+	switch r.Method {
+	case http.MethodGet:
+		w.Header().Set("Content-Type", "image/svg+xml")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(svg))
+		return
+	case http.MethodPut:
+		w.Header().Set("Content-Location", r.URL.String())
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// we should never get here
+	w.WriteHeader(http.StatusInternalServerError)
 }
 
 func genSVG(repo string, cluster bool) (string, error) {
@@ -117,7 +133,15 @@ func getRev(repo string) (string, error) {
 	url := fmt.Sprintf("https://proxy.golang.org/%s/@v/master.info", repo)
 	log.Debugf("requesting: %s", url)
 
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Errorf("http NewRequest err: %s", err)
+		return "", err
+	}
+
+	req.Header.Set("User-Agent", "gographs.io/0.1")
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Errorf("http get err: %s", err)
 		return "", err

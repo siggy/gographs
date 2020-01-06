@@ -200,9 +200,34 @@ window.addEventListener('load', (_) => {
       return
     }
 
-    const repo = "/repo/" + this.value + ".svg";
-    document.getElementById('main-svg').data = repo;
-    document.getElementById('thumb-svg').data = repo;
+    let svg;
+    if (this.value.startsWith("http://") || this.value.startsWith("https://")) {
+      const url = new URL(this.value);
+      if (url.pathname.endsWith(".svg")) {
+        svg = url.href;
+        document.getElementById('main-svg').data = svg;
+        document.getElementById('thumb-svg').data = svg;
+      } else {
+        console.warn("unrecognized input URL: " + this.value);
+        return
+      }
+    } else {
+      // assume Go repo
+      fetch("/repo/" + this.value + ".svg", {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'image/svg+xml',
+        },
+      }) // TODO: spin, this may be slow
+      .then((response) => {
+        svg = response.headers.get('Content-Location');
+        document.getElementById('main-svg').data = svg;
+        document.getElementById('thumb-svg').data = svg;
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+    }
   });
 
   Array.from(document.getElementsByClassName("package-example")).forEach(
@@ -210,6 +235,12 @@ window.addEventListener('load', (_) => {
       elm.addEventListener('click', function(e) {
         input.value = elm.text;
         e.preventDefault();
+
+        const event = new KeyboardEvent('keyup', {
+          keyCode: 13,
+        });
+        input.dispatchEvent(event);
+
         return false;
       });
     }
