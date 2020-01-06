@@ -60,7 +60,21 @@ function bindThumbnail(main, thumb){
 
   // all function below this expect window.main and window.thumb to be set
 
-  const scopeContainer = document.getElementById("scope-container");
+  const scopeContainer = document.getElementById('scope-container');
+  const thumbSvg = document.getElementById('thumb-svg');
+
+  window.addEventListener('resize', function(event){
+    scopeContainer.setAttribute("width", thumbSvg.getBoundingClientRect().width);
+
+    window.main.resize();
+    window.thumb.resize();
+    window.main.reset();
+    window.thumb.reset();
+    updateThumbScope();
+  });
+
+  // set scope-container to match size of thumbnail svg's 'width: auto'
+  scopeContainer.setAttribute("width", thumbSvg.getBoundingClientRect().width);
 
   // TODO: use document.getElementById('thumb-svg').contentDocument.querySelector("svg") ?
   scopeContainer.addEventListener('click', function(evt){
@@ -112,6 +126,7 @@ document.getElementById('main-svg').addEventListener('load', function(){
 
   // Will get called after embed element was loaded
   const main = svgPanZoom(mainSvg, {
+    viewportSelector: "#main-svg",
     panEnabled: true,
     controlIconsEnabled: false,
     zoomEnabled: true,
@@ -125,13 +140,13 @@ document.getElementById('main-svg').addEventListener('load', function(){
     contain: false,
     center: true,
     refreshRate: 'auto',
-    beforeZoom: function(){},
-    onZoom: function(){},
+    beforeZoom: null,
+    onZoom: null,
     beforePan: beforePan,
-    onPan: function(){},
-    onUpdatedCTM: function(){},
-    // customEventsHandler: {},
+    onPan: null,
+    customEventsHandler: null,
     eventsListenerElement: null,
+    onUpdatedCTM: null,
   });
 
   bindThumbnail(main, undefined);
@@ -154,8 +169,4 @@ document.getElementById('thumb-svg').addEventListener('load', function(){
   });
 
   bindThumbnail(undefined, thumb);
-
-  // set scope-container to match size of thumbnail svg's 'width: auto'
-  const scopeContainer = document.getElementById('scope-container');
-  scopeContainer.setAttribute("width", this.getBoundingClientRect().width);
 });
