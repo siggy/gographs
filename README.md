@@ -29,9 +29,8 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 
 ## TODO
 
-- fix cancelled svg request on repo change
-  - don't request repo svg twice for main and thumb
-- handle failed svg in svg-load
+- don't request repo svg twice for main and thumb
+- ensure multiple calls to addEventListener after each svg load are ok
 - cluster checkbox
 - redis cache
 - typeahead

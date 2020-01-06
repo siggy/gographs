@@ -12,7 +12,7 @@ function between(val, a, b) {
 // https://github.com/ariutta/svg-pan-zoom/blob/d107d73120460caae3ecee59192cd29a470e97b0/demo/thumbnailViewer.js
 
 function updateThumbScope() {
-  const thumbToMainZoomRatio =  window.thumb.getSizes().realZoom / window.main.getSizes().realZoom;
+  const thumbToMainZoomRatio = window.thumb.getSizes().realZoom / window.main.getSizes().realZoom;
 
   let scopeX = window.thumb.getPan().x - window.main.getPan().x * thumbToMainZoomRatio;
   let scopeY = window.thumb.getPan().y - window.main.getPan().y * thumbToMainZoomRatio;
@@ -123,6 +123,9 @@ document.getElementById('main-svg').addEventListener('load', function(){
     return
   }
 
+  // set thumbnail with same data
+  document.getElementById('thumb-svg').data = this.data;
+
   mainSvg.addEventListener(
     'wheel',
     function wheelZoom(e) {e.preventDefault()},
@@ -182,8 +185,8 @@ document.getElementById('thumb-svg').addEventListener('load', function(){
   );
 
   const thumb = svgPanZoom(thumbSvg, {
-    zoomEnabled: false,
     panEnabled: false,
+    zoomEnabled: false,
     controlIconsEnabled: false,
     dblClickZoomEnabled: false,
     preventMouseEventsDefault: true,
@@ -206,7 +209,6 @@ window.addEventListener('load', (_) => {
       if (url.pathname.endsWith(".svg")) {
         svg = url.href;
         document.getElementById('main-svg').data = svg;
-        document.getElementById('thumb-svg').data = svg;
       } else {
         console.warn("unrecognized input URL: " + this.value);
         return
@@ -222,7 +224,6 @@ window.addEventListener('load', (_) => {
       .then((response) => {
         svg = response.headers.get('Content-Location');
         document.getElementById('main-svg').data = svg;
-        document.getElementById('thumb-svg').data = svg;
       })
       .catch((error) => {
         console.error('Error:', error);
