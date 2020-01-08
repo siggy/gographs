@@ -8,6 +8,16 @@ function between(val, a, b) {
   }
 }
 
+function checkStatus(response) {
+  if (response.status >= 200 && response.status < 300) {
+    return response
+  } else {
+    var error = new Error(response.statusText)
+    error.response = response
+    throw error
+  }
+}
+
 // based on:
 // https://github.com/ariutta/svg-pan-zoom/blob/d107d73120460caae3ecee59192cd29a470e97b0/demo/thumbnailViewer.js
 
@@ -174,7 +184,7 @@ document.getElementById('main-svg').addEventListener('load', function(){
 document.getElementById('thumb-svg').addEventListener('load', function(){
   const thumbSvg = this.contentDocument.querySelector('svg');
   if (!thumbSvg) {
-    console.warn("failed to find svg");
+    console.error("failed to find svg");
     return
   }
 
@@ -210,7 +220,7 @@ window.addEventListener('load', (_) => {
         svg = url.href;
         document.getElementById('main-svg').data = svg;
       } else {
-        console.warn("unrecognized input URL: " + this.value);
+        console.error("unrecognized input URL: " + this.value);
         return
       }
     } else {
@@ -221,12 +231,13 @@ window.addEventListener('load', (_) => {
           'Content-Type': 'image/svg+xml',
         },
       }) // TODO: spin, this may be slow
+      .then(checkStatus)
       .then((response) => {
         svg = response.headers.get('Content-Location');
         document.getElementById('main-svg').data = svg;
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error('fetch failure:', error);
       });
     }
   });
