@@ -133,7 +133,8 @@ document.getElementById('main-svg').addEventListener('load', function(){
     return
   }
 
-  // set thumbnail with same data
+  // This passes ownership of the objectURL to thumb-svg, which will be
+  // responsible for calling revokeObjectURL().
   document.getElementById('thumb-svg').data = this.data;
 
   mainSvg.addEventListener(
@@ -182,6 +183,8 @@ document.getElementById('main-svg').addEventListener('load', function(){
 })
 
 document.getElementById('thumb-svg').addEventListener('load', function(){
+  URL.revokeObjectURL(this.data);
+
   const thumbSvg = this.contentDocument.querySelector('svg');
   if (!thumbSvg) {
     console.error("failed to find svg");
@@ -213,33 +216,30 @@ window.addEventListener('load', (_) => {
       return
     }
 
-    let svg;
+    let url;
     if (this.value.startsWith("http://") || this.value.startsWith("https://")) {
-      const url = new URL(this.value);
-      if (url.pathname.endsWith(".svg")) {
-        svg = url.href;
-        document.getElementById('main-svg').data = svg;
-      } else {
+      url = new URL(this.value);
+      if (!url.pathname.endsWith(".svg")) {
         console.error("unrecognized input URL: " + this.value);
         return
       }
     } else {
       // assume Go repo
-      fetch("/repo/" + this.value + ".svg", {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'image/svg+xml',
-        },
-      }) // TODO: spin, this may be slow
-      .then(checkStatus)
-      .then((response) => {
-        svg = response.headers.get('Content-Location');
-        document.getElementById('main-svg').data = svg;
-      })
-      .catch((error) => {
-        console.error('fetch failure:', error);
-      });
+      url = "/repo/" + this.value + ".svg";
     }
+
+    fetch(url)
+    .then(checkStatus)
+    .then((resp) => resp.blob())
+    .then(function(blob) {
+      // createObjectURL() must be coupled with revokeObjectURL(). ownership
+      // of svgUrl passing from here to main-svg to thumb-svg.
+      const svgUrl = URL.createObjectURL(blob)
+      document.getElementById('main-svg').data = svgUrl;
+    })
+    .catch((error) => {
+      console.error('fetch failure:', error);
+    });
   });
 
   Array.from(document.getElementsByClassName("package-example")).forEach(

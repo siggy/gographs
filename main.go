@@ -53,7 +53,7 @@ func main() {
 }
 
 func repoHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet && r.Method != http.MethodPut {
+	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -79,20 +79,9 @@ func repoHandler(w http.ResponseWriter, r *http.Request) {
 		repoCache.Set(r.URL.String(), svg)
 	}
 
-	switch r.Method {
-	case http.MethodGet:
-		w.Header().Set("Content-Type", "image/svg+xml")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(svg))
-		return
-	case http.MethodPut:
-		w.Header().Set("Content-Location", r.URL.String())
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	// we should never get here
-	w.WriteHeader(http.StatusInternalServerError)
+	w.Header().Set("Content-Type", "image/svg+xml")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(svg))
 }
 
 func genSVG(repo string, cluster bool) (string, error) {
