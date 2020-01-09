@@ -225,7 +225,7 @@ window.addEventListener('load', (_) => {
       }
     } else {
       // assume Go repo
-      url = "/repo/" + this.value + ".svg";
+      url = "/repo/" + this.value + ".svg?cluster=" + document.getElementById("check-cluster").checked;
     }
 
     fetch(url)

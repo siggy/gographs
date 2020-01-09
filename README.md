@@ -29,10 +29,12 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 
 ## TODO
 
-- don't request repo svg twice for main and thumb
 - ensure multiple calls to addEventListener after each svg load are ok
-- cluster checkbox
 - redis cache
+  - cache intermediate steps
 - typeahead
 - direct links for svg, png, dot
 - generic svg and dot support, paste and url
+- cluster checkbox should auto-reload already-displaying repos
+- hideable control panel and thumbnail browser
+- list most popular repos / queries
