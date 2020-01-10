@@ -86,7 +86,7 @@ function bindThumbnail(main, thumb){
   const thumbSvg = document.getElementById('thumb-svg');
 
   window.addEventListener('resize', function(event){
-    scopeContainer.setAttribute('width', thumbSvg.getBoundingClientRect().width);
+    scopeContainer.setAttribute('width', thumbSvg.clientWidth);
 
     window.main.resize();
     window.thumb.resize();
@@ -96,7 +96,7 @@ function bindThumbnail(main, thumb){
   });
 
   // set scope-container to match size of thumbnail svg's 'width: auto'
-  scopeContainer.setAttribute('width', thumbSvg.getBoundingClientRect().width);
+  scopeContainer.setAttribute('width', thumbSvg.clientWidth);
 
   // TODO: use document.getElementById('thumb-svg').contentDocument.querySelector('svg') ?
   scopeContainer.addEventListener('click', function(evt){
@@ -209,7 +209,7 @@ document.getElementById('thumb-svg').addEventListener('load', function(){
 });
 
 window.addEventListener('load', (_) => {
-  const input = document.getElementById('input')
+  const input = document.getElementById('svg-input')
 
   input.addEventListener("keyup", function(event) {
     if (event.keyCode !== 13) {

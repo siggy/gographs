@@ -1,9 +1,16 @@
 .floating-panel {
   z-index: 0;
   position: absolute;
+  margin: 12px;
+  left: 0;
   border: 2px solid rgba(210,225,240,1);
   border-radius: 8px;
+  box-shadow: 2px 2px 1px #555;
 }
+
+/*
+ * full screen svg
+ */
 
 .main {
   z-index: -1;
@@ -14,9 +21,12 @@
   height: 100%;
 }
 
+/*
+ * thumbnail browser
+ */
+
 .thumb {
-  bottom: 2%;
-  left: 2%;
+  bottom: 0;
   height: 25%;
   width: auto;
 }
@@ -24,25 +34,77 @@
 #scope-container {
   z-index: 1;
   border: 2px solid rgba(0, 0, 0, 0);
+  box-shadow: unset;
 }
-
 
 /*
  * control panel
  */
 
-#control-panel {
-  top: 2%;
-  left: 2%;
+ #control-panel {
+  top: 0;
   height: 25%;
-  width: auto;
-  background: rgba(225,235,245,0.75);
+  width: 500px;
+  padding: 6px;
+  background: rgba(225,235,245,0.5);
+  transition: transform 250ms ease-in-out;
 }
 
-.input {
+#control-toggle {
+  box-sizing: border-box;
+  display: none;
+}
+
+#control-toggle:checked ~ #control-panel {
+  /*
+   * width: 500px + 2 * (padding: 6px) + 2 * (border: 2px) + 1 * (margin: 12px) + box-shadow: 2px
+   */
+  transform: translateX(-530px);
+}
+
+#control-toggle-icon {
+  box-sizing: border-box;
+  cursor: pointer;
+  position: absolute;
+  z-index: 1;
+  top: 22px;
+  left: 530px;
+  height: 22px;
+  width: 22px;
+  border: 1px solid #000;
+  transition: transform 250ms ease-in-out;
+}
+
+.spinner {
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  transition: all 0.3s;
+  height: 3px;
+  width: 100%;
+  background-color: #555;
+}
+.diagonal.part-2 {
+  margin-top: 3px;
+}
+#control-toggle[type=checkbox]:checked ~ #control-toggle-icon {
+  transform: translateX(-530px);
+}
+#control-toggle[type=checkbox]:checked ~ #control-toggle-icon > .diagonal.part-1 {
+  transform: rotate(135deg);
+  margin-top: 8px;
+}
+#control-toggle[type=checkbox]:checked ~ #control-toggle-icon > .diagonal.part-2 {
+  transform: rotate(-135deg);
+  margin-top: -9px;
+}
+
+#svg-input {
+  width: 100%;
   color: #555;
   padding: 6px 12px;
   font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-sizing:border-box;
 }
