@@ -50,6 +50,11 @@
   transition: transform 250ms ease-in-out;
 }
 
+/*
+ * control panel open/close
+ * based on https://codepen.io/plavookac/pen/qomrMw?editors=1100
+ */
+
 #control-toggle {
   box-sizing: border-box;
   display: none;
@@ -62,6 +67,10 @@
   transform: translateX(-530px);
 }
 
+#control-toggle:checked ~ #control-toggle-icon {
+  transform: translateX(-530px);
+}
+
 #control-toggle-icon {
   box-sizing: border-box;
   cursor: pointer;
@@ -71,7 +80,6 @@
   left: 530px;
   height: 22px;
   width: 22px;
-  border: 1px solid #000;
   transition: transform 250ms ease-in-out;
 }
 
@@ -84,20 +92,34 @@
   width: 100%;
   background-color: #555;
 }
-.diagonal.part-2 {
+
+.horizontal {
   margin-top: 3px;
+  opacity: 0;
 }
-#control-toggle[type=checkbox]:checked ~ #control-toggle-icon {
-  transform: translateX(-530px);
-}
-#control-toggle[type=checkbox]:checked ~ #control-toggle-icon > .diagonal.part-1 {
+.diagonal.part-1 {
   transform: rotate(135deg);
   margin-top: 8px;
 }
-#control-toggle[type=checkbox]:checked ~ #control-toggle-icon > .diagonal.part-2 {
+.diagonal.part-2 {
   transform: rotate(-135deg);
   margin-top: -9px;
 }
+#control-toggle:checked ~ #control-toggle-icon > .horizontal {
+  opacity: 1;
+}
+#control-toggle:checked ~ #control-toggle-icon > .diagonal.part-1 {
+  transform: unset;
+  margin-top: 0;
+}
+#control-toggle:checked ~ #control-toggle-icon > .diagonal.part-2 {
+  transform: unset;
+  margin-top: 3px;
+}
+
+/*
+ * primary input text
+ */
 
 #svg-input {
   width: 100%;
