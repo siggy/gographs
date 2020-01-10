@@ -33,8 +33,9 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 - redis cache
   - cache intermediate steps
 - typeahead
-- direct links for svg, png, dot
+- direct links for png, dot
 - generic svg and dot support, paste and url
-- cluster checkbox should auto-reload already-displaying repos
-- hideable control panel and thumbnail browser
 - list most popular repos / queries
+- permalink URLs
+  - https://godoc.org/github.com/linkerd/linkerd2/pkg/k8s
+- hide cluster checkbox when viewing raw svg

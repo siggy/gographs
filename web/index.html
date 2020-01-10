@@ -7,6 +7,7 @@
 
     <link href="/css/gographs.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="https://golang.org/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <title>GoGraphs</title>
   </head>
@@ -26,6 +27,8 @@
         <input type="checkbox" id="check-cluster">
         <label for="check-cluster">Cluster</label>
       </div>
+
+      <a id="external-svg" target="_blank">svg<i class="fa fa-external-link"></i></a>
 
       <ul>
         <li>
@@ -49,11 +52,11 @@
       </ul>
     </div>
 
-    <object id="main-svg" class="main" type="image/svg+xml" data="/repo/github.com/linkerd/linkerd2.svg?cluster=false">
+    <object id="main-svg" class="main" type="image/svg+xml">
       Your browser does not support SVGs
     </object>
 
-    <object id="thumb-svg" class="thumb floating-panel" type="image/svg+xml" data="/repo/github.com/linkerd/linkerd2.svg?cluster=false">
+    <object id="thumb-svg" class="thumb floating-panel" type="image/svg+xml">
       Your browser does not support SVGs
     </object>
 

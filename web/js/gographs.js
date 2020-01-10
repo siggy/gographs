@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 function between(val, a, b) {
   if (a < b) {
@@ -129,7 +129,7 @@ document.getElementById('scope-container').addEventListener('load', function(){
 document.getElementById('main-svg').addEventListener('load', function(){
   const mainSvg = this.contentDocument.querySelector('svg');
   if (!mainSvg) {
-    console.warn("failed to find svg");
+    console.debug('no svg loaded');
     return
   }
 
@@ -187,7 +187,7 @@ document.getElementById('thumb-svg').addEventListener('load', function(){
 
   const thumbSvg = this.contentDocument.querySelector('svg');
   if (!thumbSvg) {
-    console.error("failed to find svg");
+    console.debug('no svg loaded');
     return
   }
 
@@ -211,21 +211,21 @@ document.getElementById('thumb-svg').addEventListener('load', function(){
 window.addEventListener('load', (_) => {
   const input = document.getElementById('svg-input')
 
-  input.addEventListener("keyup", function(event) {
+  input.addEventListener('keyup', function(event) {
     if (event.keyCode !== 13) {
       return
     }
 
     let url;
-    if (this.value.startsWith("http://") || this.value.startsWith("https://")) {
+    if (this.value.startsWith('http://') || this.value.startsWith('https://')) {
       url = new URL(this.value);
-      if (!url.pathname.endsWith(".svg")) {
-        console.error("unrecognized input URL: " + this.value);
+      if (!url.pathname.endsWith('.svg')) {
+        console.error('unrecognized input URL: ' + this.value);
         return
       }
     } else {
       // assume Go repo
-      url = "/repo/" + this.value + ".svg?cluster=" + document.getElementById("check-cluster").checked;
+      url = '/repo/' + this.value + '.svg?cluster=' + document.getElementById('check-cluster').checked;
     }
 
     fetch(url)
@@ -233,28 +233,35 @@ window.addEventListener('load', (_) => {
     .then((resp) => resp.blob())
     .then(function(blob) {
       // createObjectURL() must be coupled with revokeObjectURL(). ownership
-      // of svgUrl passing from here to main-svg to thumb-svg.
+      // of svgUrl passes from here to main-svg to thumb-svg.
       const svgUrl = URL.createObjectURL(blob)
       document.getElementById('main-svg').data = svgUrl;
+
+      const externalSvg = document.getElementById('external-svg');
+      externalSvg.href = url;
+      externalSvg.style.display = "block";
     })
     .catch((error) => {
       console.error('fetch failure:', error);
     });
   });
 
-  Array.from(document.getElementsByClassName("package-example")).forEach(
+  Array.from(document.getElementsByClassName('package-example')).forEach(
     function(elm) {
       elm.addEventListener('click', function(e) {
         input.value = elm.text;
         e.preventDefault();
-
-        const event = new KeyboardEvent('keyup', {
-          keyCode: 13,
-        });
-        input.dispatchEvent(event);
-
+        input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
         return false;
       });
     }
   );
+
+  document.getElementById('check-cluster').addEventListener('change', function(_) {
+    input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+  });
+
+  // set default
+  input.value = 'github.com/linkerd/linkerd2';
+  input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
 });
