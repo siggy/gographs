@@ -62,6 +62,25 @@ function updateMainZoomPan(evt){
   window.main.pan({x: mainPanX, y: mainPanY});
 }
 
+function resize(_) {
+  const scopeContainer = document.getElementById('scope-container');
+  const thumbSvg = document.getElementById('thumb-svg');
+
+  scopeContainer.setAttribute('width', thumbSvg.clientWidth);
+
+  window.main.resize();
+  window.main.reset();
+  window.thumb.resize();
+  window.thumb.reset();
+
+  updateThumbScope();
+}
+
+function scopeMouseDown(e) {
+  captureMouseEvents(e);
+  updateMainZoomPan(e);
+}
+
 function bindThumbnail(main, thumb){
   if (main) {
     if (window.main) {
@@ -85,23 +104,12 @@ function bindThumbnail(main, thumb){
   const scopeContainer = document.getElementById('scope-container');
   const thumbSvg = document.getElementById('thumb-svg');
 
-  window.addEventListener('resize', function(event){
-    scopeContainer.setAttribute('width', thumbSvg.clientWidth);
-
-    window.main.resize();
-    window.thumb.resize();
-    window.main.reset();
-    window.thumb.reset();
-    updateThumbScope();
-  });
+  window.addEventListener('resize', resize);
 
   // set scope-container to match size of thumbnail svg's 'width: auto'
   scopeContainer.setAttribute('width', thumbSvg.clientWidth);
 
-  scopeContainer.addEventListener('mousedown', function(evt){
-    captureMouseEvents(evt);
-    updateMainZoomPan(evt);
-  });
+  scopeContainer.addEventListener('mousedown', scopeMouseDown);
 
   window.main.setOnZoom(function(_){
     updateThumbScope();
@@ -301,15 +309,15 @@ function mousemoveListener(e) {
 
 function mouseupListener(e) {
   restoreGlobalMouseEvents();
-  document.removeEventListener ('mouseup',   mouseupListener,   EventListenerMode);
-  document.removeEventListener ('mousemove', mousemoveListener, EventListenerMode);
+  document.removeEventListener('mouseup',   mouseupListener,   EventListenerMode);
+  document.removeEventListener('mousemove', mousemoveListener, EventListenerMode);
   e.stopPropagation();
 }
 
 function captureMouseEvents(e) {
   preventGlobalMouseEvents ();
-  document.addEventListener ('mouseup',   mouseupListener,   EventListenerMode);
-  document.addEventListener ('mousemove', mousemoveListener, EventListenerMode);
+  document.addEventListener('mouseup',   mouseupListener,   EventListenerMode);
+  document.addEventListener('mousemove', mousemoveListener, EventListenerMode);
   e.preventDefault ();
   e.stopPropagation ();
 }

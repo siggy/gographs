@@ -40,3 +40,4 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 - permalink URLs
   - https://godoc.org/github.com/linkerd/linkerd2/pkg/k8s
 - hide cluster checkbox when viewing raw svg
+- consider capturing all mouse scrolling over every element
