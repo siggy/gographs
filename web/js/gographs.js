@@ -98,12 +98,8 @@ function bindThumbnail(main, thumb){
   // set scope-container to match size of thumbnail svg's 'width: auto'
   scopeContainer.setAttribute('width', thumbSvg.clientWidth);
 
-  // TODO: use document.getElementById('thumb-svg').contentDocument.querySelector('svg') ?
-  scopeContainer.addEventListener('click', function(evt){
-    updateMainZoomPan(evt);
-  });
-
-  scopeContainer.addEventListener('mousemove', function(evt){
+  scopeContainer.addEventListener('mousedown', function(evt){
+    captureMouseEvents(evt);
     updateMainZoomPan(evt);
   });
 
@@ -265,3 +261,40 @@ window.addEventListener('load', (_) => {
   input.value = 'github.com/linkerd/linkerd2';
   input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
 });
+
+/*
+ * scope mouse capture
+ *
+ * based on:
+ * http://code.fitness/post/2016/06/capture-mouse-events.html
+ */
+
+const EventListenerMode = {capture: true};
+
+function preventGlobalMouseEvents() {
+  document.body.style.pointerEvents = 'none';
+}
+
+function restoreGlobalMouseEvents() {
+  document.body.style.pointerEvents = 'auto';
+}
+
+function mousemoveListener(e) {
+  e.stopPropagation();
+  updateMainZoomPan(e);
+}
+
+function mouseupListener(e) {
+  restoreGlobalMouseEvents();
+  document.removeEventListener ('mouseup',   mouseupListener,   EventListenerMode);
+  document.removeEventListener ('mousemove', mousemoveListener, EventListenerMode);
+  e.stopPropagation();
+}
+
+function captureMouseEvents(e) {
+  preventGlobalMouseEvents ();
+  document.addEventListener ('mouseup',   mouseupListener,   EventListenerMode);
+  document.addEventListener ('mousemove', mousemoveListener, EventListenerMode);
+  e.preventDefault ();
+  e.stopPropagation ();
+}
