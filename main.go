@@ -43,7 +43,7 @@ func main() {
 	r.PathPrefix("/repo").HandlerFunc(repoHandler)
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/")))
 
-	host := "localhost:8888"
+	host := "0.0.0.0:8888"
 	log.Infof("serving on %s", host)
 	err := http.ListenAndServe(host, r)
 	if err != nil {

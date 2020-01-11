@@ -117,7 +117,22 @@ function bindThumbnail(main, thumb){
 document.getElementById('scope-container').addEventListener('load', function(){
   this.addEventListener(
     'wheel',
-    function wheelZoom(e) {e.preventDefault()},
+    function wheelZoom(e) {
+      const mainSvg = document.getElementById('main-svg');
+      const thumbSvg = document.getElementById('thumb-svg');
+
+      Object.defineProperties(e, {
+        clientX: { value: mainSvg.offsetWidth * e.offsetX / thumbSvg.offsetWidth },
+        clientY: { value: mainSvg.offsetHeight * e.offsetY / thumbSvg.offsetHeight },
+      });
+
+      mainSvg.contentDocument.querySelector('svg').dispatchEvent(
+        new WheelEvent(e.type, e)
+      );
+
+      e.preventDefault();
+      return false;
+    },
     { passive: false }
   );
 });

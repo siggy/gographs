@@ -29,6 +29,7 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 
 ## TODO
 
+- prevent normal dragging on mobile
 - ensure multiple calls to addEventListener after each svg load are ok
 - redis cache
   - cache intermediate steps
