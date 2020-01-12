@@ -111,8 +111,22 @@ func (c *Cache) GetRepoDir(repo string, version string) (string, error) {
 	return c.client.HGet(repoDirHash, repoDirKey(repo, version)).Result()
 }
 
-func (c *Cache) RepoSetIncr(repo string) {
+func (c *Cache) RepoScoreIncr(repo string) {
 	c.client.ZIncrBy(repoScores, 1, repo)
+}
+
+func (c *Cache) RepoScores() ([]string, error) {
+	cmd := c.client.ZRevRangeByScore(repoScores, &redis.ZRangeBy{
+		Min:    "0",
+		Max:    "+inf",
+		Offset: 0,
+		Count:  10,
+	})
+	if cmd.Err() != nil {
+		return nil, cmd.Err()
+	}
+
+	return cmd.Val(), nil
 }
 
 func repoKey(repo string, cluster bool) string {

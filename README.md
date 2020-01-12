@@ -31,7 +31,8 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 
 ## TODO
 
-- cache tmp build dirs and rev info
+- list most popular repos / queries
+- refresh button
 - fix irc logo thumbnail border aspect ratio
 - runtime flags
   - log-level
@@ -40,15 +41,11 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 - show progress during repo compile
 - prevent normal dragging on mobile
 - ensure multiple calls to addEventListener after each svg load are ok
-- redis cache
-  - cache intermediate steps
 - typeahead
 - direct links for png, dot
 - generic svg and dot support, paste and url
-- list most popular repos / queries
 - permalink URLs
   - https://godoc.org/github.com/linkerd/linkerd2/pkg/k8s
 - hide cluster checkbox when viewing raw svg
 - consider capturing all mouse scrolling over every element
 - firefox support
-- cache everything, refresh button

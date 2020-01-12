@@ -10,13 +10,13 @@ import (
 func main() {
 	log.SetLevel(log.DebugLevel)
 
-	repoCache, err := cache.New()
+	c, err := cache.New()
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	err = web.Start(repoCache)
+	err = web.Start(c)
 	if err != nil {
 		log.Error(err)
 		return
