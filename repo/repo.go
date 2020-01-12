@@ -45,9 +45,7 @@ func GenSVG(cache *cache.Cache, repo string, cluster bool) (string, error) {
 		return "", err
 	}
 
-	if cache.SetSVG(repo, cluster, svg) != nil {
-		log.Errorf("failed to set svg in cache: %s", err)
-	}
+	go cache.SetSVG(repo, cluster, svg)
 
 	return svg, nil
 }
@@ -80,9 +78,7 @@ func GenDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 
 		codeDir = fmt.Sprintf("%s/%s@%s", tmpDir, repo, rev)
 
-		if cache.SetRepoDir(repo, rev, codeDir) != nil {
-			log.Errorf("failed to set repo dir in cache: %s", err)
-		}
+		go cache.SetRepoDir(repo, rev, codeDir)
 	}
 
 	dot, err = runGoda(codeDir, cluster)
@@ -91,9 +87,7 @@ func GenDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 		return "", err
 	}
 
-	if cache.SetDOT(repo, cluster, dot) != nil {
-		log.Errorf("failed to set dot in cache: %s", err)
-	}
+	go cache.SetDOT(repo, cluster, dot)
 
 	return dot, nil
 }
@@ -141,9 +135,7 @@ func getRev(cache *cache.Cache, repo string) (string, error) {
 		return "", err
 	}
 
-	if cache.SetRepoVersion(repo, rev.Version) != nil {
-		log.Errorf("failed to set dot in cache: %s", err)
-	}
+	go cache.SetRepoVersion(repo, rev.Version)
 
 	return rev.Version, nil
 }

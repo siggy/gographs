@@ -51,18 +51,19 @@ func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 			return
 		}
 
+		route := mux.CurrentRoute(r)
+		tpl, err := route.GetPathTemplate()
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
+
 		out, err := cache.GetURL(r.URL.String())
 		if err != nil {
-			route := mux.CurrentRoute(r)
+			// cache miss
+
 			cluster := mux.Vars(r)["cluster"] == "true"
-
-			tpl, err := route.GetPathTemplate()
-			if err != nil {
-				rw.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-
-			goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
 			if suffix == ".svg" {
 				out, err = repo.GenSVG(cache, goRepo, cluster)
 			} else if suffix == ".dot" {
@@ -73,8 +74,10 @@ func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 				return
 			}
 
-			cache.SetURL(r.URL.String(), out)
+			go cache.SetURL(r.URL.String(), out)
 		}
+
+		go cache.RepoSetIncr(goRepo)
 
 		rw.Header().Set("Content-Type", contentType)
 		rw.WriteHeader(http.StatusOK)
