@@ -18,6 +18,25 @@ function checkStatus(response) {
   }
 }
 
+function loadSvg(svgHref, goRepo, blob) {
+  // createObjectURL() must be coupled with revokeObjectURL(). ownership
+  // of svgUrl passes from here to main-svg to thumb-svg.
+  const svgUrl = URL.createObjectURL(blob)
+  document.getElementById('main-svg').data = svgUrl;
+
+  const externalSvg = document.getElementById('external-svg');
+  externalSvg.href = svgHref;
+  externalSvg.style.display = 'block';
+
+  const externalDot = document.getElementById('external-dot');
+  if (goRepo) {
+    externalDot.href = svgHref.replace(".svg", ".dot");
+    externalDot.style.display = 'block';
+  } else {
+    externalDot.style.display = 'none';
+  }
+}
+
 // based on:
 // https://github.com/ariutta/svg-pan-zoom/blob/d107d73120460caae3ecee59192cd29a470e97b0/demo/thumbnailViewer.js
 
@@ -44,8 +63,8 @@ function updateThumbScope() {
   scope.setAttribute('height', scopeHeight);
 };
 
-function updateMainZoomPan(evt){
-  if (evt.which == 0 && evt.button == 0) {
+function updateMainZoomPan(e){
+  if (e.which === 0 && e.button === 0) {
     return false;
   }
 
@@ -54,8 +73,8 @@ function updateMainZoomPan(evt){
 
   const mainToThumbZoomRatio =  window.main.getSizes().realZoom / window.thumb.getSizes().realZoom;
 
-  const thumbPanX = Math.min(Math.max(0, evt.clientX - dim.left), dim.width) - scopeDim.width / 2;
-  const thumbPanY = Math.min(Math.max(0, evt.clientY - dim.top), dim.height) - scopeDim.height / 2;
+  const thumbPanX = Math.min(Math.max(0, e.clientX - dim.left), dim.width) - scopeDim.width / 2;
+  const thumbPanY = Math.min(Math.max(0, e.clientY - dim.top), dim.height) - scopeDim.height / 2;
   const mainPanX  = - thumbPanX * mainToThumbZoomRatio;
   const mainPanY  = - thumbPanY * mainToThumbZoomRatio;
 
@@ -227,6 +246,10 @@ document.getElementById('thumb-svg').addEventListener('load', function(){
   bindThumbnail(undefined, thumb);
 });
 
+/*
+ * window.onload
+ */
+
 window.addEventListener('load', (_) => {
   const input = document.getElementById('main-input');
 
@@ -241,8 +264,9 @@ window.addEventListener('load', (_) => {
     const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://'));
 
     let url;
+    const cluster = document.getElementById('check-cluster').checked;
     if (goRepo) {
-      url = '/repo/' + this.value + '.svg?cluster=' + document.getElementById('check-cluster').checked;
+      url = new URL('/repo/' + this.value + '.svg?cluster=' + cluster, window.location.origin);
     } else {
       url = new URL(this.value);
       if (!url.pathname.endsWith('.svg')) {
@@ -251,40 +275,26 @@ window.addEventListener('load', (_) => {
       }
     }
 
-    const spinner = document.getElementById("spinner");
-    const spinnerStart = setTimeout(function() {
-      spinner.style.display = "flex";
-    }, 250);
+    const spinnerStart = startSpinner();
 
     fetch(url)
     .then(checkStatus)
     .then(resp => resp.blob())
     .then(blob => {
-      // createObjectURL() must be coupled with revokeObjectURL(). ownership
-      // of svgUrl passes from here to main-svg to thumb-svg.
-      const svgUrl = URL.createObjectURL(blob)
-      document.getElementById('main-svg').data = svgUrl;
+      history.pushState(
+        { svgHref: url.href, goRepo: goRepo, blob: blob },
+        this.value,
+        goRepo ? "/?repo="+this.value+"&cluster="+cluster : "/?url="+url,
+      );
 
-      const externalSvg = document.getElementById('external-svg');
-      externalSvg.href = url;
-      externalSvg.style.display = 'block';
+      loadSvg(url.href, goRepo, blob);
 
-      const externalDot = document.getElementById('external-dot');
-      if (goRepo) {
-        externalDot.href = url.replace(".svg", ".dot");
-        externalDot.style.display = 'block';
-      } else {
-        externalDot.style.display = 'none';
-      }
-
-      clearTimeout(spinnerStart);
-      spinner.style.display = "none";
+      stopSpinner(spinnerStart);
     })
     .catch(error => {
       console.error('fetch failure:', error);
 
-      clearTimeout(spinnerStart);
-      spinner.style.display = "none";
+      stopSpinner(spinnerStart);
     });
   });
 
@@ -305,10 +315,27 @@ window.addEventListener('load', (_) => {
 
   initAutoComplete();
 
-  // set default
-  input.value = 'github.com/linkerd/linkerd2';
+  // load default SVG or one provided via permalink
+  let inputValue = 'github.com/linkerd/linkerd2'; // TODO default to gographs
+
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.has("repo")) {
+    // /?repo=github.com/siggy/gographs&cluster=false
+    inputValue = searchParams.get("repo");
+    document.getElementById('check-cluster').checked = searchParams.get("cluster") === "true";
+  } else if (searchParams.has("url")) {
+    // /?url=http://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
+    inputValue = searchParams.get("url");
+  }
+
+  input.value = inputValue;
   input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
 });
+
+window.onpopstate = function(event) {
+  // TODO: set checkbox?
+  loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
+}
 
 /*
  * scope mouse capture
@@ -347,6 +374,10 @@ function captureMouseEvents(e) {
   e.stopPropagation ();
 }
 
+/*
+ * autocomplete
+ */
+
 function initAutoComplete() {
   const input = document.getElementById('main-input');
 
@@ -378,4 +409,19 @@ function initAutoComplete() {
   .catch(error => {
     console.error('fetch failure:', error);
   });
+}
+
+/*
+ * spinner
+ */
+
+function startSpinner() {
+  return setTimeout(function() {
+    document.getElementById("spinner").style.display = "flex";
+  }, 250);
+}
+
+function stopSpinner(timeout) {
+  clearTimeout(timeout);
+  document.getElementById("spinner").style.display = "none";
 }

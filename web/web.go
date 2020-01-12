@@ -17,18 +17,15 @@ import (
 )
 
 func Start(c *cache.Cache) error {
-	router := mux.NewRouter()
+	router := mux.NewRouter().Methods(http.MethodGet).Subrouter()
 
 	repoHandler := mkRepoHandler(c)
 	router.PathPrefix("/repo").Queries("cluster", "{cluster:true|false}").HandlerFunc(repoHandler)
 	router.PathPrefix("/repo").HandlerFunc(repoHandler)
-
-	topReposHandler := mkTopReposHandler(c)
-	router.HandleFunc("/top-repos", topReposHandler)
-
+	router.HandleFunc("/top-repos", mkTopReposHandler(c))
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
-	host := "localhost:8888"
+	host := "localhost:8888" // TODO: parameterize
 	log.Infof("serving on %s", host)
 
 	return http.ListenAndServe(host, router)
@@ -38,19 +35,14 @@ func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 
 	// /repo/github.com/siggy/gographs.svg?cluster=true
 	return func(rw http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			rw.WriteHeader(http.StatusMethodNotAllowed)
-			return
-		}
-
 		suffix := ""
 		contentType := ""
 		if strings.HasSuffix(r.URL.Path, ".svg") {
 			suffix = ".svg"
-			contentType = "image/svg+xml;charset=utf-8"
+			contentType = "image/svg+xml; charset=utf-8"
 		} else if strings.HasSuffix(r.URL.Path, ".dot") {
 			suffix = ".dot"
-			contentType = "text/plain;charset=utf-8"
+			contentType = "text/plain; charset=utf-8"
 		} else {
 			rw.WriteHeader(http.StatusBadRequest)
 			return
@@ -112,7 +104,7 @@ func mkTopReposHandler(cache *cache.Cache) http.HandlerFunc {
 			return
 		}
 
-		rw.Header().Set("Content-Type", "application/json;charset=utf-8")
+		rw.Header().Set("Content-Type", "application/json; charset=utf-8")
 		rw.WriteHeader(http.StatusOK)
 		rw.Write([]byte(j))
 	}
