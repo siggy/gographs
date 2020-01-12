@@ -156,7 +156,7 @@
   content: "";
   width: 80px;
   height: 80px;
-  border: 6px solid #f3f3f3;
+  border: 8px solid #f3f3f3;
   border-top: 8px solid rgba(210,225,240,1);
   border-radius: 100%;
   will-change: transform;
@@ -171,7 +171,6 @@
     transform: rotate(360deg);
   }
 }
-
 
 /*
  * misc

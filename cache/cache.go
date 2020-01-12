@@ -10,6 +10,9 @@ const (
 	urlToSVGHash = "url-to-svg"
 )
 
+// URL -> SVG
+// TODO: per-revision caching
+
 func New() (*Cache, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
