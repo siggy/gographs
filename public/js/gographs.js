@@ -30,7 +30,7 @@ function loadSvg(svgHref, goRepo, blob) {
 
   const externalDot = document.getElementById('external-dot');
   if (goRepo) {
-    externalDot.href = svgHref.replace(".svg", ".dot");
+    externalDot.href = svgHref.replace('.svg', '.dot');
     externalDot.style.display = 'block';
   } else {
     externalDot.style.display = 'none';
@@ -259,7 +259,7 @@ window.addEventListener('load', (_) => {
     }
 
     // TODO: fix double keyup on autocomplete
-    console.log("keyup");
+    console.log('keyup');
 
     const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://'));
 
@@ -284,7 +284,7 @@ window.addEventListener('load', (_) => {
       history.pushState(
         { svgHref: url.href, goRepo: goRepo, blob: blob },
         this.value,
-        goRepo ? "/?repo="+this.value+"&cluster="+cluster : "/?url="+url,
+        goRepo ? '/?repo='+this.value+'&cluster='+cluster : '/?url='+url,
       );
 
       loadSvg(url.href, goRepo, blob);
@@ -315,26 +315,32 @@ window.addEventListener('load', (_) => {
 
   initAutoComplete();
 
-  // load default SVG or one provided via permalink
-  let inputValue = 'github.com/linkerd/linkerd2'; // TODO default to gographs
-
-  const searchParams = new URLSearchParams(window.location.search);
-  if (searchParams.has("repo")) {
-    // /?repo=github.com/siggy/gographs&cluster=false
-    inputValue = searchParams.get("repo");
-    document.getElementById('check-cluster').checked = searchParams.get("cluster") === "true";
-  } else if (searchParams.has("url")) {
-    // /?url=http://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
-    inputValue = searchParams.get("url");
+  updateInputsFromUrl();
+  // set default value if nothing present
+  if (input.value === '') {
+    input.value = 'github.com/linkerd/linkerd2'
   }
 
-  input.value = inputValue;
   input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
 });
 
 window.onpopstate = function(event) {
-  // TODO: set checkbox?
+  updateInputsFromUrl();
   loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
+}
+
+function updateInputsFromUrl() {
+  const input = document.getElementById('main-input');
+
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.has('repo')) {
+    // /?repo=github.com/siggy/gographs&cluster=false
+    input.value = searchParams.get('repo');
+    document.getElementById('check-cluster').checked = searchParams.get('cluster') === 'true';
+  } else if (searchParams.has('url')) {
+    // /?url=http://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
+    input.value = searchParams.get('url');
+  }
 }
 
 /*
@@ -381,7 +387,7 @@ function captureMouseEvents(e) {
 function initAutoComplete() {
   const input = document.getElementById('main-input');
 
-  fetch("/top-repos")
+  fetch('/top-repos')
   .then(checkStatus)
   .then(resp => resp.json())
   .then(json => {
@@ -417,11 +423,11 @@ function initAutoComplete() {
 
 function startSpinner() {
   return setTimeout(function() {
-    document.getElementById("spinner").style.display = "flex";
+    document.getElementById('spinner').style.display = 'flex';
   }, 250);
 }
 
 function stopSpinner(timeout) {
   clearTimeout(timeout);
-  document.getElementById("spinner").style.display = "none";
+  document.getElementById('spinner').style.display = 'none';
 }
