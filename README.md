@@ -49,3 +49,4 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 - hide cluster checkbox when viewing raw svg
 - consider capturing all mouse scrolling over every element
 - firefox support
+- cache everything, refresh button

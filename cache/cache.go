@@ -7,7 +7,10 @@ type Cache struct {
 }
 
 const (
-	urlToSVGHash = "url-to-svg"
+	// http://localhost:8888/repo/github.com/siggy/gographs.svg?cluster=true
+	// =>
+	// [dot or svg file]
+	urlHash = "url"
 )
 
 // URL -> SVG
@@ -28,10 +31,10 @@ func New() (*Cache, error) {
 	}, nil
 }
 
-func (c *Cache) SetURLToSVG(k, v string) error {
-	return c.client.HSet(urlToSVGHash, k, v).Err()
+func (c *Cache) SetURL(k, v string) error {
+	return c.client.HSet(urlHash, k, v).Err()
 }
 
-func (c *Cache) GetURLToSVG(k string) (string, error) {
-	return c.client.HGet(urlToSVGHash, k).Result()
+func (c *Cache) GetURL(k string) (string, error) {
+	return c.client.HGet(urlHash, k).Result()
 }

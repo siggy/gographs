@@ -46,13 +46,28 @@ func (w *Web) Listen() error {
 	return nil
 }
 
+// repoHandler:
+// /repo/github.com/siggy/gographs.svg?cluster=true
 func (w *Web) repoHandler(rw http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	svg, err := w.cache.GetURLToSVG(r.URL.String())
+	suffix := ""
+	contentType := ""
+	if strings.HasSuffix(r.URL.Path, ".svg") {
+		suffix = ".svg"
+		contentType = "image/svg+xml;charset=utf-8"
+	} else if strings.HasSuffix(r.URL.Path, ".dot") {
+		suffix = ".dot"
+		contentType = "text/plain;charset=utf-8"
+	} else {
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	out, err := w.cache.GetURL(r.URL.String())
 	if err != nil {
 		route := mux.CurrentRoute(r)
 		cluster := mux.Vars(r)["cluster"] == "true"
@@ -63,17 +78,21 @@ func (w *Web) repoHandler(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), ".svg")
-		svg, err = repo.GenSVG(goRepo, cluster)
+		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
+		if suffix == ".svg" {
+			out, err = repo.GenSVG(goRepo, cluster)
+		} else if suffix == ".dot" {
+			out, err = repo.GenDOT(goRepo, cluster)
+		}
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		w.cache.SetURLToSVG(r.URL.String(), svg)
+		w.cache.SetURL(r.URL.String(), out)
 	}
 
-	rw.Header().Set("Content-Type", "image/svg+xml")
+	rw.Header().Set("Content-Type", contentType)
 	rw.WriteHeader(http.StatusOK)
-	rw.Write([]byte(svg))
+	rw.Write([]byte(out))
 }

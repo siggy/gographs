@@ -27,6 +27,22 @@ type revInfo struct {
 }
 
 func GenSVG(repo string, cluster bool) (string, error) {
+	dot, err := GenDOT(repo, cluster)
+	if err != nil {
+		log.Errorf("error generating dot: %s", err)
+		return "", err
+	}
+
+	svg, err := dotToSVG(dot)
+	if err != nil {
+		log.Errorf("error converting dot to svg: %s", err)
+		return "", err
+	}
+
+	return svg, nil
+}
+
+func GenDOT(repo string, cluster bool) (string, error) {
 	rev, err := getRev(repo)
 	if err != nil {
 		log.Errorf("failed to get revision: %s", err)
@@ -51,13 +67,7 @@ func GenSVG(repo string, cluster bool) (string, error) {
 		log.Errorf("goda failed: %s", err)
 	}
 
-	svg, err := dotToSVG(dot)
-	if err != nil {
-		log.Errorf("error converting dot to svg: %s", err)
-		return "", err
-	}
-
-	return svg, nil
+	return dot, nil
 }
 
 func getRev(repo string) (string, error) {
