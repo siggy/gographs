@@ -16,8 +16,7 @@ func main() {
 		return
 	}
 
-	w := web.New(repoCache)
-	err = w.Listen()
+	err = web.Start(repoCache)
 	if err != nil {
 		log.Error(err)
 		return

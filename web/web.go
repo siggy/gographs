@@ -15,84 +15,69 @@ import (
 	"github.com/siggy/gographs/repo"
 )
 
-type Web struct {
-	router *mux.Router
-	cache  *cache.Cache
-}
+func Start(c *cache.Cache) error {
+	router := mux.NewRouter()
+	handler := mkRepoHandler(c)
 
-func New(c *cache.Cache) *Web {
+	router.PathPrefix("/repo").Queries("cluster", "{cluster:true|false}").HandlerFunc(handler)
+	router.PathPrefix("/repo").HandlerFunc(handler)
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
-	w := &Web{
-		router: mux.NewRouter(),
-		cache:  c,
-	}
-
-	w.router.PathPrefix("/repo").Queries("cluster", "{cluster:true|false}").HandlerFunc(w.repoHandler)
-	w.router.PathPrefix("/repo").HandlerFunc(w.repoHandler)
-	w.router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
-
-	return w
-}
-
-func (w *Web) Listen() error {
 	host := "localhost:8888"
 	log.Infof("serving on %s", host)
-	err := http.ListenAndServe(host, w.router)
-	if err != nil {
-		log.Errorf("Failed to ListenAndServe on %s: %s", host, err)
-		return err
-	}
 
-	return nil
+	return http.ListenAndServe(host, router)
 }
 
-// repoHandler:
-// /repo/github.com/siggy/gographs.svg?cluster=true
-func (w *Web) repoHandler(rw http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		rw.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
+func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 
-	suffix := ""
-	contentType := ""
-	if strings.HasSuffix(r.URL.Path, ".svg") {
-		suffix = ".svg"
-		contentType = "image/svg+xml;charset=utf-8"
-	} else if strings.HasSuffix(r.URL.Path, ".dot") {
-		suffix = ".dot"
-		contentType = "text/plain;charset=utf-8"
-	} else {
-		rw.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	out, err := w.cache.GetURL(r.URL.String())
-	if err != nil {
-		route := mux.CurrentRoute(r)
-		cluster := mux.Vars(r)["cluster"] == "true"
-
-		tpl, err := route.GetPathTemplate()
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
+	// /repo/github.com/siggy/gographs.svg?cluster=true
+	return func(rw http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			rw.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
 
-		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
-		if suffix == ".svg" {
-			out, err = repo.GenSVG(goRepo, cluster)
-		} else if suffix == ".dot" {
-			out, err = repo.GenDOT(goRepo, cluster)
-		}
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
+		suffix := ""
+		contentType := ""
+		if strings.HasSuffix(r.URL.Path, ".svg") {
+			suffix = ".svg"
+			contentType = "image/svg+xml;charset=utf-8"
+		} else if strings.HasSuffix(r.URL.Path, ".dot") {
+			suffix = ".dot"
+			contentType = "text/plain;charset=utf-8"
+		} else {
+			rw.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		w.cache.SetURL(r.URL.String(), out)
-	}
+		out, err := cache.GetURL(r.URL.String())
+		if err != nil {
+			route := mux.CurrentRoute(r)
+			cluster := mux.Vars(r)["cluster"] == "true"
 
-	rw.Header().Set("Content-Type", contentType)
-	rw.WriteHeader(http.StatusOK)
-	rw.Write([]byte(out))
+			tpl, err := route.GetPathTemplate()
+			if err != nil {
+				rw.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
+			if suffix == ".svg" {
+				out, err = repo.GenSVG(goRepo, cluster)
+			} else if suffix == ".dot" {
+				out, err = repo.GenDOT(goRepo, cluster)
+			}
+			if err != nil {
+				rw.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			cache.SetURL(r.URL.String(), out)
+		}
+
+		rw.Header().Set("Content-Type", contentType)
+		rw.WriteHeader(http.StatusOK)
+		rw.Write([]byte(out))
+	}
 }
