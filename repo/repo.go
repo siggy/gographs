@@ -58,7 +58,7 @@ func GenDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 		return dot, nil
 	}
 
-	rev, err := getRev(repo)
+	rev, err := getRev(cache, repo)
 	if err != nil {
 		log.Errorf("failed to get revision: %s", err)
 		return "", err
@@ -90,7 +90,12 @@ func GenDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 	return dot, nil
 }
 
-func getRev(repo string) (string, error) {
+func getRev(cache *cache.Cache, repo string) (string, error) {
+	version, err := cache.GetRepoVersion(repo)
+	if err == nil {
+		return version, nil
+	}
+
 	url := fmt.Sprintf("https://proxy.golang.org/%s/@v/master.info", repo)
 	log.Debugf("requesting: %s", url)
 
@@ -126,6 +131,10 @@ func getRev(repo string) (string, error) {
 	if err != nil {
 		log.Errorf("unmarshal err:%s", err)
 		return "", err
+	}
+
+	if cache.SetRepoVersion(repo, rev.Version) != nil {
+		log.Errorf("failed to set dot in cache: %s", err)
 	}
 
 	return rev.Version, nil

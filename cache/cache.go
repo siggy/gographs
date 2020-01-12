@@ -25,6 +25,11 @@ const (
 	// =>
 	// [dot file]
 	dotHash = "dot"
+
+	// github.com/prometheus/prometheus
+	// =>
+	// v1.8.2-0.20200110142541-64194f7d45cb
+	repoVersionHash = "repo-version"
 )
 
 // URL -> SVG
@@ -67,6 +72,14 @@ func (c *Cache) SetDOT(repo string, cluster bool, dot string) error {
 
 func (c *Cache) GetDOT(repo string, cluster bool) (string, error) {
 	return c.client.HGet(dotHash, repoKey(repo, cluster)).Result()
+}
+
+func (c *Cache) SetRepoVersion(repo string, version string) error {
+	return c.client.HSet(repoVersionHash, repo, version).Err()
+}
+
+func (c *Cache) GetRepoVersion(repo string) (string, error) {
+	return c.client.HGet(repoVersionHash, repo).Result()
 }
 
 func repoKey(repo string, cluster bool) string {
