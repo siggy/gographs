@@ -5,6 +5,8 @@
 ```bash
 go get github.com/loov/goda
 brew install dot # or equivalent
+brew install redis # or equivalent
+redis-server /usr/local/etc/redis.conf
 ```
 
 ### Boot server
@@ -30,6 +32,7 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 ## TODO
 
 - render fetch errors
+- show progress during repo compile
 - prevent normal dragging on mobile
 - ensure multiple calls to addEventListener after each svg load are ok
 - redis cache

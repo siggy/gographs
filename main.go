@@ -31,21 +31,27 @@ type revInfo struct {
 
 // URL -> SVG
 // TODO: per-revision caching
-// TODO: use redis
-var repoCache = cache.New()
+var repoCache *cache.Cache
 
 func main() {
 	log.SetLevel(log.DebugLevel)
 	log.SetOutput(os.Stderr)
 
+	var err error
+	repoCache, err = cache.New()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	r := mux.NewRouter()
 	r.PathPrefix("/repo").Queries("cluster", "{cluster:true|false}").HandlerFunc(repoHandler)
 	r.PathPrefix("/repo").HandlerFunc(repoHandler)
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/")))
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
-	host := "0.0.0.0:8888"
+	host := "localhost:8888"
 	log.Infof("serving on %s", host)
-	err := http.ListenAndServe(host, r)
+	err = http.ListenAndServe(host, r)
 	if err != nil {
 		log.Errorf("Failed to ListenAndServe on %s: %s", host, err)
 		return
@@ -58,8 +64,8 @@ func repoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	svg, ok := repoCache.Get(r.URL.String())
-	if !ok {
+	svg, err := repoCache.GetURLToSVG(r.URL.String())
+	if err != nil {
 		route := mux.CurrentRoute(r)
 		cluster := mux.Vars(r)["cluster"] == "true"
 
@@ -76,7 +82,7 @@ func repoHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		repoCache.Set(r.URL.String(), svg)
+		repoCache.SetURLToSVG(r.URL.String(), svg)
 	}
 
 	w.Header().Set("Content-Type", "image/svg+xml")
