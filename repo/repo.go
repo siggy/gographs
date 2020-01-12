@@ -64,19 +64,27 @@ func GenDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 		return "", err
 	}
 
-	zipBody, err := downloadZip(repo, rev)
-	if err != nil {
-		log.Errorf("failed to download zip: %s", err)
-		return "", err
+	codeDir, err := cache.GetRepoDir(repo, rev)
+	if err != nil || !exists(codeDir) {
+		zipBody, err := downloadZip(repo, rev)
+		if err != nil {
+			log.Errorf("failed to download zip: %s", err)
+			return "", err
+		}
+
+		tmpDir, err := unzip(zipBody)
+		if err != nil {
+			log.Errorf("failed unzip: %s", err)
+			return "", err
+		}
+
+		codeDir = fmt.Sprintf("%s/%s@%s", tmpDir, repo, rev)
+
+		if cache.SetRepoDir(repo, rev, codeDir) != nil {
+			log.Errorf("failed to set repo dir in cache: %s", err)
+		}
 	}
 
-	tmpDir, err := unzip(zipBody)
-	if err != nil {
-		log.Errorf("failed unzip: %s", err)
-		return "", err
-	}
-
-	codeDir := fmt.Sprintf("%s/%s@%s", tmpDir, repo, rev)
 	dot, err = runGoda(codeDir, cluster)
 	if err != nil {
 		log.Errorf("goda failed: %s", err)
@@ -245,4 +253,9 @@ func dotToSVG(dot string) (string, error) {
 	}
 
 	return string(svg), nil
+}
+
+func exists(dir string) bool {
+	_, err := os.Stat(dir)
+	return !os.IsNotExist(err)
 }

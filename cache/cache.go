@@ -30,6 +30,11 @@ const (
 	// =>
 	// v1.8.2-0.20200110142541-64194f7d45cb
 	repoVersionHash = "repo-version"
+
+	// repo+version
+	// =>
+	// /tmp/foo
+	repoDirHash = "repo-dir"
 )
 
 // URL -> SVG
@@ -82,6 +87,18 @@ func (c *Cache) GetRepoVersion(repo string) (string, error) {
 	return c.client.HGet(repoVersionHash, repo).Result()
 }
 
+func (c *Cache) SetRepoDir(repo string, version string, repoDir string) error {
+	return c.client.HSet(repoDirHash, repoDirKey(repo, version), repoDir).Err()
+}
+
+func (c *Cache) GetRepoDir(repo string, version string) (string, error) {
+	return c.client.HGet(repoDirHash, repoDirKey(repo, version)).Result()
+}
+
 func repoKey(repo string, cluster bool) string {
-	return fmt.Sprintf("%s_%s", repo, cluster)
+	return fmt.Sprintf("%s+%t", repo, cluster)
+}
+
+func repoDirKey(repo string, version string) string {
+	return fmt.Sprintf("%s+%s", repo, version)
 }
