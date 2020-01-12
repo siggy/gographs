@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/siggy/gographs/cache"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -26,23 +27,37 @@ type revInfo struct {
 	Time    time.Time `json:"Time"`
 }
 
-func GenSVG(repo string, cluster bool) (string, error) {
-	dot, err := GenDOT(repo, cluster)
+func GenSVG(cache *cache.Cache, repo string, cluster bool) (string, error) {
+	svg, err := cache.GetSVG(repo, cluster)
+	if err == nil {
+		return svg, nil
+	}
+
+	dot, err := GenDOT(cache, repo, cluster)
 	if err != nil {
 		log.Errorf("error generating dot: %s", err)
 		return "", err
 	}
 
-	svg, err := dotToSVG(dot)
+	svg, err = dotToSVG(dot)
 	if err != nil {
 		log.Errorf("error converting dot to svg: %s", err)
 		return "", err
 	}
 
+	if cache.SetSVG(repo, cluster, svg) != nil {
+		log.Errorf("failed to set svg in cache: %s", err)
+	}
+
 	return svg, nil
 }
 
-func GenDOT(repo string, cluster bool) (string, error) {
+func GenDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
+	dot, err := cache.GetDOT(repo, cluster)
+	if err == nil {
+		return dot, nil
+	}
+
 	rev, err := getRev(repo)
 	if err != nil {
 		log.Errorf("failed to get revision: %s", err)
@@ -62,9 +77,14 @@ func GenDOT(repo string, cluster bool) (string, error) {
 	}
 
 	codeDir := fmt.Sprintf("%s/%s@%s", tmpDir, repo, rev)
-	dot, err := runGoda(codeDir, cluster)
+	dot, err = runGoda(codeDir, cluster)
 	if err != nil {
 		log.Errorf("goda failed: %s", err)
+		return "", err
+	}
+
+	if cache.SetDOT(repo, cluster, dot) != nil {
+		log.Errorf("failed to set dot in cache: %s", err)
 	}
 
 	return dot, nil

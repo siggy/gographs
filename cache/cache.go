@@ -1,6 +1,10 @@
 package cache
 
-import "github.com/go-redis/redis/v7"
+import (
+	"fmt"
+
+	"github.com/go-redis/redis/v7"
+)
 
 type Cache struct {
 	client *redis.Client
@@ -11,6 +15,16 @@ const (
 	// =>
 	// [dot or svg file]
 	urlHash = "url"
+
+	// repo+cluster
+	// =>
+	// [svg file]
+	svgHash = "svg"
+
+	// repo+cluster
+	// =>
+	// [dot file]
+	dotHash = "dot"
 )
 
 // URL -> SVG
@@ -37,4 +51,24 @@ func (c *Cache) SetURL(k, v string) error {
 
 func (c *Cache) GetURL(k string) (string, error) {
 	return c.client.HGet(urlHash, k).Result()
+}
+
+func (c *Cache) SetSVG(repo string, cluster bool, svg string) error {
+	return c.client.HSet(svgHash, repoKey(repo, cluster), svg).Err()
+}
+
+func (c *Cache) GetSVG(repo string, cluster bool) (string, error) {
+	return c.client.HGet(svgHash, repoKey(repo, cluster)).Result()
+}
+
+func (c *Cache) SetDOT(repo string, cluster bool, dot string) error {
+	return c.client.HSet(dotHash, repoKey(repo, cluster), dot).Err()
+}
+
+func (c *Cache) GetDOT(repo string, cluster bool) (string, error) {
+	return c.client.HGet(dotHash, repoKey(repo, cluster)).Result()
+}
+
+func repoKey(repo string, cluster bool) string {
+	return fmt.Sprintf("%s_%s", repo, cluster)
 }

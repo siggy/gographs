@@ -64,9 +64,9 @@ func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 
 			goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
 			if suffix == ".svg" {
-				out, err = repo.GenSVG(goRepo, cluster)
+				out, err = repo.GenSVG(cache, goRepo, cluster)
 			} else if suffix == ".dot" {
-				out, err = repo.GenDOT(goRepo, cluster)
+				out, err = repo.GenDOT(cache, goRepo, cluster)
 			}
 			if err != nil {
 				rw.WriteHeader(http.StatusInternalServerError)
