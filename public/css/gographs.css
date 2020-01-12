@@ -3,7 +3,7 @@
   position: absolute;
   margin: 12px;
   left: 0;
-  border: 2px solid rgba(210,225,240,1);
+  border: 2px solid rgb(210,225,240);
   border-radius: 8px;
   box-shadow: 2px 2px 1px #555;
 }
@@ -33,7 +33,7 @@
 
 #scope-container {
   z-index: 1;
-  border: 2px solid rgba(0, 0, 0, 0);
+  border: 2px solid #000;
   box-shadow: unset;
 }
 
@@ -121,7 +121,7 @@
  * primary input text
  */
 
-#svg-input {
+#main-input {
   width: 100%;
   color: #555;
   padding: 6px 12px;
@@ -157,7 +157,7 @@
   width: 80px;
   height: 80px;
   border: 8px solid #f3f3f3;
-  border-top: 8px solid rgba(210,225,240,1);
+  border-top: 8px solid rgb(210,225,240);
   border-radius: 100%;
   will-change: transform;
   animation: spin 1s infinite linear
@@ -182,4 +182,12 @@ a {
 
 .external-link {
   display: none;
+}
+
+.autocomplete-suggestion {
+  color: #555;
+}
+
+.autocomplete-suggestion b {
+  color: #000;
 }

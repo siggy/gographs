@@ -31,6 +31,7 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 
 ## TODO
 
+- autocomplete for all repos
 - list most popular repos / queries
 - refresh button
 - fix irc logo thumbnail border aspect ratio

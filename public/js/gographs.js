@@ -228,12 +228,15 @@ document.getElementById('thumb-svg').addEventListener('load', function(){
 });
 
 window.addEventListener('load', (_) => {
-  const input = document.getElementById('svg-input')
+  const input = document.getElementById('main-input');
 
   input.addEventListener('keyup', function(event) {
     if (event.keyCode !== 13) {
       return
     }
+
+    // TODO: fix double keyup on autocomplete
+    console.log("keyup");
 
     const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://'));
 
@@ -300,6 +303,8 @@ window.addEventListener('load', (_) => {
     input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
   });
 
+  initAutoComplete();
+
   // set default
   input.value = 'github.com/linkerd/linkerd2';
   input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
@@ -340,4 +345,37 @@ function captureMouseEvents(e) {
   document.addEventListener('mousemove', mousemoveListener, EventListenerMode);
   e.preventDefault ();
   e.stopPropagation ();
+}
+
+function initAutoComplete() {
+  const input = document.getElementById('main-input');
+
+  fetch("/top-repos")
+  .then(checkStatus)
+  .then(resp => resp.json())
+  .then(json => {
+
+    new autoComplete({
+      selector: '#main-input',
+      minChars: 0,
+      cache: false,
+      source: function(term, suggest){
+        term = term.toLowerCase();
+        const choices = json.slice(0,10);
+        const suggestions = [];
+        for (let i=0; i<choices.length; i++) {
+          if (~choices[i].toLowerCase().indexOf(term)) {
+            suggestions.push(choices[i]);
+          }
+        }
+        suggest(suggestions);
+      },
+      onSelect: function(e, term, item){
+        input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+      },
+    });
+  })
+  .catch(error => {
+    console.error('fetch failure:', error);
+  });
 }

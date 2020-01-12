@@ -23,8 +23,8 @@ func Start(c *cache.Cache) error {
 	router.PathPrefix("/repo").Queries("cluster", "{cluster:true|false}").HandlerFunc(repoHandler)
 	router.PathPrefix("/repo").HandlerFunc(repoHandler)
 
-	repoScoresHandler := mkRepoScoresHandler(c)
-	router.HandleFunc("/scores", repoScoresHandler)
+	topReposHandler := mkTopReposHandler(c)
+	router.HandleFunc("/top-repos", topReposHandler)
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
@@ -91,9 +91,9 @@ func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 }
 
 // TODO: poll for this every interval, hold result in local mem
-func mkRepoScoresHandler(cache *cache.Cache) http.HandlerFunc {
+func mkTopReposHandler(cache *cache.Cache) http.HandlerFunc {
 
-	// /repo/github.com/siggy/gographs.svg?cluster=true
+	// /top-repos
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			rw.WriteHeader(http.StatusMethodNotAllowed)

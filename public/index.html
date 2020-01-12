@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="GoGraphs generates SVG graph dependencies for your Go projects.">
 
-    <link href="/css/gographs.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="https://golang.org/favicon.ico">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/js-autocomplete@1.0.4/auto-complete.css" integrity="sha256-bX+rnnNrWmSrL9BjREvIc3tU9uClWcKmoEFJ2VKnUBc=" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/gographs.css">
 
     <title>GoGraphs</title>
   </head>
@@ -24,7 +26,7 @@
     </label>
 
     <div id="control-panel" class="floating-panel">
-      <input type="text" placeholder="github.com/siggy/gographs" id="svg-input" aria-label="SVG Input">
+      <input type="text" placeholder="github.com/siggy/gographs" id="main-input" aria-label="SVG Input">
       <div>
         <input type="checkbox" id="check-cluster">
         <label for="check-cluster">Cluster</label>
@@ -69,7 +71,8 @@
       </g>
     </svg>
 
-    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js" integrity="sha256-9GNxAyAInGHQ9XzsK4hsAt4E4h65Lr0i6qMn/fCmt8Y=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-autocomplete@1.0.4/auto-complete.min.js" integrity="sha256-SJP2/lB7KKZ6g3WvZVyNddmsyllDI6G+SJQcP/yDVQE=" crossorigin="anonymous"></script>
     <script src="/js/gographs.js" type="text/javascript"></script>
   </body>
 </html>
