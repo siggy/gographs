@@ -235,16 +235,17 @@ window.addEventListener('load', (_) => {
       return
     }
 
+    const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://'));
+
     let url;
-    if (this.value.startsWith('http://') || this.value.startsWith('https://')) {
+    if (goRepo) {
+      url = '/repo/' + this.value + '.svg?cluster=' + document.getElementById('check-cluster').checked;
+    } else {
       url = new URL(this.value);
       if (!url.pathname.endsWith('.svg')) {
         console.error('unrecognized input URL: ' + this.value);
         return
       }
-    } else {
-      // assume Go repo
-      url = '/repo/' + this.value + '.svg?cluster=' + document.getElementById('check-cluster').checked;
     }
 
     const spinner = document.getElementById("spinner");
@@ -264,6 +265,14 @@ window.addEventListener('load', (_) => {
       const externalSvg = document.getElementById('external-svg');
       externalSvg.href = url;
       externalSvg.style.display = 'block';
+
+      const externalDot = document.getElementById('external-dot');
+      if (goRepo) {
+        externalDot.href = url.replace(".svg", ".dot");
+        externalDot.style.display = 'block';
+      } else {
+        externalDot.style.display = 'none';
+      }
 
       clearTimeout(spinnerStart);
       spinner.style.display = "none";
