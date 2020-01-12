@@ -16,20 +16,20 @@ import (
 )
 
 type Web struct {
-	r *mux.Router
-	c *cache.Cache
+	router *mux.Router
+	cache  *cache.Cache
 }
 
 func New(c *cache.Cache) *Web {
 
 	w := &Web{
-		r: mux.NewRouter(),
-		c: c,
+		router: mux.NewRouter(),
+		cache:  c,
 	}
 
-	w.r.PathPrefix("/repo").Queries("cluster", "{cluster:true|false}").HandlerFunc(w.repoHandler)
-	w.r.PathPrefix("/repo").HandlerFunc(w.repoHandler)
-	w.r.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
+	w.router.PathPrefix("/repo").Queries("cluster", "{cluster:true|false}").HandlerFunc(w.repoHandler)
+	w.router.PathPrefix("/repo").HandlerFunc(w.repoHandler)
+	w.router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
 	return w
 }
@@ -37,7 +37,7 @@ func New(c *cache.Cache) *Web {
 func (w *Web) Listen() error {
 	host := "localhost:8888"
 	log.Infof("serving on %s", host)
-	err := http.ListenAndServe(host, w.r)
+	err := http.ListenAndServe(host, w.router)
 	if err != nil {
 		log.Errorf("Failed to ListenAndServe on %s: %s", host, err)
 		return err
@@ -52,7 +52,7 @@ func (w *Web) repoHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	svg, err := w.c.GetURLToSVG(r.URL.String())
+	svg, err := w.cache.GetURLToSVG(r.URL.String())
 	if err != nil {
 		route := mux.CurrentRoute(r)
 		cluster := mux.Vars(r)["cluster"] == "true"
@@ -70,7 +70,7 @@ func (w *Web) repoHandler(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.c.SetURLToSVG(r.URL.String(), svg)
+		w.cache.SetURLToSVG(r.URL.String(), svg)
 	}
 
 	rw.Header().Set("Content-Type", "image/svg+xml")

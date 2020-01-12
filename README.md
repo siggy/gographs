@@ -31,6 +31,9 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 
 ## TODO
 
+- runtime flags
+  - log-level
+  - redis-server
 - render fetch errors
 - show progress during repo compile
 - prevent normal dragging on mobile
