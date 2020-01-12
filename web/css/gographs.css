@@ -83,7 +83,7 @@
   transition: transform 250ms ease-in-out;
 }
 
-.spinner {
+.toggler {
   position: relative;
   float: left;
   box-sizing: border-box;
@@ -130,6 +130,48 @@
   border-radius: 4px;
   box-sizing:border-box;
 }
+
+
+/*
+ * spinner
+ *
+ * based on: // TODO: move to JS
+ * https://dev.to/wangonya/displaying-a-css-spinner-on-ajax-calls-with-fetch-api-4ndo
+ */
+
+ #spinner {
+  z-index: 2;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(85,85,85,0.1);
+}
+
+#spinner::after {
+  content: "";
+  width: 80px;
+  height: 80px;
+  border: 6px solid #f3f3f3;
+  border-top: 8px solid rgba(210,225,240,1);
+  border-radius: 100%;
+  will-change: transform;
+  animation: spin 1s infinite linear
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 
 /*
  * misc

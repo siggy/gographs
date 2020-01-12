@@ -101,10 +101,10 @@ function bindThumbnail(main, thumb){
 
   // all function below this expect window.main and window.thumb to be set
 
+  window.addEventListener('resize', resize);
+
   const scopeContainer = document.getElementById('scope-container');
   const thumbSvg = document.getElementById('thumb-svg');
-
-  window.addEventListener('resize', resize);
 
   // set scope-container to match size of thumbnail svg's 'width: auto'
   scopeContainer.setAttribute('width', thumbSvg.clientWidth);
@@ -247,10 +247,15 @@ window.addEventListener('load', (_) => {
       url = '/repo/' + this.value + '.svg?cluster=' + document.getElementById('check-cluster').checked;
     }
 
+    const spinner = document.getElementById("spinner");
+    const spinnerStart = setTimeout(function() {
+      spinner.style.display = "flex";
+    }, 250);
+
     fetch(url)
     .then(checkStatus)
-    .then((resp) => resp.blob())
-    .then(function(blob) {
+    .then(resp => resp.blob())
+    .then(blob => {
       // createObjectURL() must be coupled with revokeObjectURL(). ownership
       // of svgUrl passes from here to main-svg to thumb-svg.
       const svgUrl = URL.createObjectURL(blob)
@@ -258,10 +263,16 @@ window.addEventListener('load', (_) => {
 
       const externalSvg = document.getElementById('external-svg');
       externalSvg.href = url;
-      externalSvg.style.display = "block";
+      externalSvg.style.display = 'block';
+
+      clearTimeout(spinnerStart);
+      spinner.style.display = "none";
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('fetch failure:', error);
+
+      clearTimeout(spinnerStart);
+      spinner.style.display = "none";
     });
   });
 

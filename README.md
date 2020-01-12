@@ -29,6 +29,7 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
 
 ## TODO
 
+- render fetch errors
 - prevent normal dragging on mobile
 - ensure multiple calls to addEventListener after each svg load are ok
 - redis cache
@@ -41,3 +42,4 @@ curl -X PUT http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
   - https://godoc.org/github.com/linkerd/linkerd2/pkg/k8s
 - hide cluster checkbox when viewing raw svg
 - consider capturing all mouse scrolling over every element
+- firefox support
