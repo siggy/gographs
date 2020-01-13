@@ -33,8 +33,8 @@ Example: https://gographs.io/?repo=github.com/siggy/gographs?cluster=false
 
 #### GET /view?url=[SVG_URL]
 Content-Type: text/html; charset=utf-8
-Example: http://localhost:8888/?url=http://localhost:8888/repo/github.com/loov/goda.svg?cluster=false
-Example: https://gographs.io/?url=http://localhost:8888/repo/github.com/loov/goda.svg?cluster=false
+Example: http://localhost:8888/?url=http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
+Example: https://gographs.io/?url=http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
 
 ### API
 

@@ -27,15 +27,25 @@ function loadSvg(svgHref, goRepo, blob) {
   document.getElementById('main-svg').data = svgUrl;
 
   const externalSvg = document.getElementById('external-svg');
+  const externalDot = document.getElementById('external-dot');
+  const externalRepo = document.getElementById('external-repo');
+  const externalGoDoc = document.getElementById('external-godoc');
+
   externalSvg.href = svgHref;
   externalSvg.style.display = 'block';
 
-  const externalDot = document.getElementById('external-dot');
   if (goRepo) {
     externalDot.href = svgHref.replace('.svg', '.dot');
+    externalRepo.href = "https://"+goRepo;
+    externalGoDoc.href = "https://godoc.org/" + goRepo;
+
     externalDot.style.display = 'block';
+    externalRepo.style.display = 'block';
+    externalGoDoc.style.display = 'block';
   } else {
     externalDot.style.display = 'none';
+    externalRepo.style.display = 'none';
+    externalGoDoc.style.display = 'none';
   }
 }
 
@@ -267,7 +277,9 @@ window.addEventListener('load', (_) => {
       return
     }
 
-    const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://'));
+    const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://')) ?
+      this.value :
+      null;
 
     let url;
     const cluster = document.getElementById('check-cluster').checked;
