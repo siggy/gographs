@@ -1,3 +1,17 @@
+# GoGraphs
+
+[GoGraphs](https://gographs.io) renders dependency graphs for Go packages:
+
+![gographs dependency example](https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false "GoGraphs Dependencies")
+
+## Credits
+
+This tool is built using many open source packages, but two in particular
+deserve calling out:
+
+- [goda](https://github.com/loov/goda)
+- [SVGPan](https://github.com/ariutta/svg-pan-zoom)
+
 ## Local dev
 
 ### First-time setup
