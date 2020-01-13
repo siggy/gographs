@@ -2,15 +2,7 @@
 
 [GoGraphs](https://gographs.io) renders dependency graphs for Go packages:
 
-![gographs dependency example](https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false "GoGraphs Dependencies")
-
-## Credits
-
-This tool is built using many open source packages, but two in particular
-deserve calling out:
-
-- [goda](https://github.com/loov/goda)
-- [SVGPan](https://github.com/ariutta/svg-pan-zoom)
+![GoGraphs dependency example](https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false "GoGraphs Dependencies")
 
 ## Local dev
 
@@ -29,38 +21,43 @@ redis-server /usr/local/etc/redis.conf
 go run main.go
 ```
 
-Browse to http:/localhost:8888
+Browse to http://localhost:8888
 
 ## HTTP Endpoints
 
-### Web
+### GET /
+- Content-Type: `text/html; charset=utf-8`
+- Example: http://localhost:8888
+- Example: https://gographs.io
 
-#### GET /
-Content-Type: text/html; charset=utf-8
-Example: http://localhost:8888
-Example: https://gographs.io
+### GET /?repo=[GO_REPO]
+- Content-Type: `text/html; charset=utf-8`
+- Example: http://localhost:8888/?repo=github.com/loov/goda?cluster=false
+- Example: https://gographs.io/?repo=github.com/siggy/gographs?cluster=false
 
-#### GET /view?repo=[GO_REPO]
-Content-Type: text/html; charset=utf-8
-Example: http://localhost:8888/?repo=github.com/loov/goda?cluster=false
-Example: https://gographs.io/?repo=github.com/siggy/gographs?cluster=false
+### GET /?url=[SVG_URL]
+- Content-Type: `text/html; charset=utf-8`
+- Example: http://localhost:8888/?url=http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
+- Example: https://gographs.io/?url=http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
 
-#### GET /view?url=[SVG_URL]
-Content-Type: text/html; charset=utf-8
-Example: http://localhost:8888/?url=http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
-Example: https://gographs.io/?url=http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
+### GET /repo/[GITHUB_REPO].svg
+- Content-Type: `image/svg+xml; charset=utf-8`
+- Example: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
+- Example: https://gographs.io/repo/github.com/linkerd/linkerd2.svg
 
-### API
+### GET /repo/[GITHUB_REPO].dot
+- Content-Type: `text/plain; charset=utf-8`
+- Example:  http://localhost:8888/repo/github.com/linkerd/linkerd2.dot
+- Example:  https://gographs.io/repo/github.com/linkerd/linkerd2.dot
 
-#### GET /repo/[GITHUB_REPO].svg
-Content-Type: image/svg+xml; charset=utf-8
-Example: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
-Example: https://gographs.io/repo/github.com/linkerd/linkerd2.svg
+## Credits
 
-#### GET /repo/[GITHUB_REPO].dot
-Content-Type: text/plain; charset=utf-8
-Example:  http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
-Example:  https://gographs.io/repo/github.com/linkerd/linkerd2.svg
+This tool is built using many open source packages, but two in particular
+deserve calling out:
+
+- [goda](https://github.com/loov/goda)
+- [SVGPan](https://github.com/ariutta/svg-pan-zoom)
+
 
 
 ## TODO
