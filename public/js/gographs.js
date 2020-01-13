@@ -221,7 +221,14 @@ document.getElementById('main-svg').addEventListener('load', function(){
 })
 
 document.getElementById('thumb-svg').addEventListener('load', function(){
-  URL.revokeObjectURL(this.data);
+  setTimeout(function() {
+    // Delay revoking the temporary blob URL. This should not be necessary, but
+    // is a workaround to ensure main-svg and thumb-svg successfully load the
+    // URL. May be related to:
+    // https://stackoverflow.com/a/30708820/7868488
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=827932
+    URL.revokeObjectURL(this.data);
+  }, 1000);
 
   const thumbSvg = this.contentDocument.querySelector('svg');
   if (!thumbSvg) {
@@ -326,7 +333,15 @@ window.addEventListener('load', (_) => {
 
 window.onpopstate = function(event) {
   updateInputsFromUrl();
-  loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
+
+  const input = document.getElementById('main-input');
+  if (input.value !== '' && event.state && event.state.blob) {
+    loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
+  } else {
+    // set default value if nothing present
+    input.value = 'github.com/linkerd/linkerd2'
+    input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+  }
 }
 
 function updateInputsFromUrl() {

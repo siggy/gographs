@@ -51,12 +51,7 @@ Example:  https://gographs.io/repo/github.com/linkerd/linkerd2.svg
 
 ## TODO
 
-- fix back button
 - figure out how to render root `/` page with defaults without query string in url
-- direct links for svg, png
-  - back/forward support
-- autocomplete for all repos
-- list most popular repos / queries
 - refresh button
 - fix thumbnail resize/refresh jitter
 - fix irc logo thumbnail border aspect ratio
@@ -66,8 +61,6 @@ Example:  https://gographs.io/repo/github.com/linkerd/linkerd2.svg
 - render fetch errors
 - show progress during repo compile
 - prevent normal dragging on mobile
-- ensure multiple calls to addEventListener after each svg load are ok
-- typeahead
 - generic svg and dot support, paste and url
 - permalink URLs
   - https://godoc.org/github.com/linkerd/linkerd2/pkg/k8s
