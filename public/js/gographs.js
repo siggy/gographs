@@ -265,9 +265,6 @@ window.addEventListener('load', (_) => {
       return
     }
 
-    // TODO: fix double keyup on autocomplete
-    console.log('keyup');
-
     const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://'));
 
     let url;
@@ -388,11 +385,11 @@ function mouseupListener(e) {
 }
 
 function captureMouseEvents(e) {
-  preventGlobalMouseEvents ();
+  preventGlobalMouseEvents();
   document.addEventListener('mouseup',   mouseupListener,   EventListenerMode);
   document.addEventListener('mousemove', mousemoveListener, EventListenerMode);
-  e.preventDefault ();
-  e.stopPropagation ();
+  e.preventDefault();
+  e.stopPropagation();
 }
 
 /*
@@ -423,7 +420,12 @@ function initAutoComplete() {
         suggest(suggestions);
       },
       onSelect: function(e, term, item){
+        if (e instanceof KeyboardEvent && e.keyCode === 13) {
+          // the input element also handles keyboard enter, skip this one.
+          return
+        }
         input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+        e.preventDefault();
       },
     });
   })
