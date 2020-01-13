@@ -26,29 +26,44 @@ Browse to http://localhost:8888
 ## HTTP Endpoints
 
 ### GET /
+
+Defaults to rendering this Go package.
+
 - Content-Type: `text/html; charset=utf-8`
 - Example: http://localhost:8888
 - Example: https://gographs.io
 
 ### GET /?repo=[GO_REPO]
+
+Permalink to view a Go repo SVG.
+
 - Content-Type: `text/html; charset=utf-8`
-- Example: http://localhost:8888/?repo=github.com/loov/goda?cluster=false
+- Example: http://localhost:8888/?repo=github.com/linkerd/linkerd2?cluster=false
 - Example: https://gographs.io/?repo=github.com/siggy/gographs?cluster=false
 
 ### GET /?url=[SVG_URL]
+
+Permalink to view an arbitrary SVG URL.
+
 - Content-Type: `text/html; charset=utf-8`
-- Example: http://localhost:8888/?url=http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
-- Example: https://gographs.io/?url=http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
+- Example: http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
+- Example: https://gographs.io/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
 
 ### GET /repo/[GITHUB_REPO].svg
+
+Go repo SVG direct link.
+
 - Content-Type: `image/svg+xml; charset=utf-8`
 - Example: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
-- Example: https://gographs.io/repo/github.com/linkerd/linkerd2.svg
+- Example: https://gographs.io/repo/github.com/siggy/gographs.svg
 
 ### GET /repo/[GITHUB_REPO].dot
+
+Go repo GraphViz DOT direct link.
+
 - Content-Type: `text/plain; charset=utf-8`
 - Example:  http://localhost:8888/repo/github.com/linkerd/linkerd2.dot
-- Example:  https://gographs.io/repo/github.com/linkerd/linkerd2.dot
+- Example:  https://gographs.io/repo/github.com/siggy/gographs.dot
 
 ## Credits
 
@@ -62,19 +77,16 @@ deserve calling out:
 
 ## TODO
 
-- refresh button
-- fix thumbnail resize/refresh jitter
-- fix irc logo thumbnail border aspect ratio
 - runtime flags
   - log-level
   - redis-server
-- render fetch errors
-- show progress during repo compile
-- prevent normal dragging on mobile
-- generic svg and dot support, paste and url
-- permalink URLs
-  - https://godoc.org/github.com/linkerd/linkerd2/pkg/k8s
-- hide cluster checkbox when viewing raw svg
-- consider capturing all mouse scrolling over every element
 - firefox support
+- render fetch errors
+- prevent normal dragging on mobile
 - remove or repurpose localhost URLs in readme
+- refresh button
+- fix thumbnail resize/refresh jitter
+- fix irc logo thumbnail border aspect ratio
+- show progress during repo compile
+- generic svg and dot support, paste and url
+- consider capturing all mouse scrolling over every element
