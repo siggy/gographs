@@ -1,5 +1,7 @@
 'use strict';
 
+const defaultInput = 'github.com/linkerd/linkerd2';
+
 function between(val, a, b) {
   if (a < b) {
     return Math.max(a, Math.min(val, b));
@@ -285,10 +287,17 @@ window.addEventListener('load', (_) => {
     .then(checkStatus)
     .then(resp => resp.blob())
     .then(blob => {
+
+      let urlState = goRepo ? '/?repo='+this.value+'&cluster='+cluster : '/?url='+url;
+      if (this.value === defaultInput && goRepo && !cluster) {
+        // special root URL for default inputs
+        urlState = '/';
+      }
+
       history.pushState(
         { svgHref: url.href, goRepo: goRepo, blob: blob },
         this.value,
-        goRepo ? '/?repo='+this.value+'&cluster='+cluster : '/?url='+url,
+        urlState,
       );
 
       loadSvg(url.href, goRepo, blob);
@@ -317,15 +326,10 @@ window.addEventListener('load', (_) => {
     input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
   });
 
-  initAutoComplete();
-
   updateInputsFromUrl();
-  // set default value if nothing present
-  if (input.value === '') {
-    input.value = 'github.com/linkerd/linkerd2'
-  }
-
   input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+
+  initAutoComplete();
 });
 
 window.onpopstate = function(event) {
@@ -335,8 +339,6 @@ window.onpopstate = function(event) {
   if (input.value !== '' && event.state && event.state.blob) {
     loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
   } else {
-    // set default value if nothing present
-    input.value = 'github.com/linkerd/linkerd2'
     input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
   }
 }
@@ -352,6 +354,10 @@ function updateInputsFromUrl() {
   } else if (searchParams.has('url')) {
     // /?url=http://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
     input.value = searchParams.get('url');
+  } else {
+    // unrecognized URL, reset everything to default
+    input.value = defaultInput;
+    document.getElementById('check-cluster').checked = false;
   }
 }
 

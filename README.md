@@ -51,7 +51,6 @@ Example:  https://gographs.io/repo/github.com/linkerd/linkerd2.svg
 
 ## TODO
 
-- figure out how to render root `/` page with defaults without query string in url
 - refresh button
 - fix thumbnail resize/refresh jitter
 - fix irc logo thumbnail border aspect ratio
