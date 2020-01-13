@@ -30,6 +30,7 @@ function loadSvg(svgHref, goRepo, blob) {
   const externalDot = document.getElementById('external-dot');
   const externalRepo = document.getElementById('external-repo');
   const externalGoDoc = document.getElementById('external-godoc');
+  const checkCluster = document.getElementById('check-cluster-input');
 
   externalSvg.href = svgHref;
   externalSvg.style.display = 'block';
@@ -42,10 +43,12 @@ function loadSvg(svgHref, goRepo, blob) {
     externalDot.style.display = 'block';
     externalRepo.style.display = 'block';
     externalGoDoc.style.display = 'block';
+    checkCluster.style.display = 'block';
   } else {
     externalDot.style.display = 'none';
     externalRepo.style.display = 'none';
     externalGoDoc.style.display = 'none';
+    checkCluster.style.display = 'none';
   }
 }
 
