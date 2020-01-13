@@ -1,9 +1,14 @@
+body {
+  font-family: Roboto, Arial, sans-serif;
+  color: #555;
+}
+
 .floating-panel {
   z-index: 0;
   position: absolute;
   margin: 12px;
   left: 0;
-  border: 2px solid rgb(210,225,240);
+  border: 2px solid rgb(210, 225, 240);
   border-radius: 8px;
   box-shadow: 2px 2px 1px #555;
 }
@@ -46,8 +51,38 @@
   height: 25%;
   width: 500px;
   padding: 6px;
-  background: rgba(225,235,245,0.5);
+  background: rgba(225, 235, 245, 0.5);
   transition: transform 250ms ease-in-out;
+}
+
+
+/*
+ * primary input text
+ */
+
+.control-panel-module {
+  width: 100%;
+  color: #555;
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#input-error {
+  position: absolute;
+  bottom: 6px;
+  border-color: #bf4040;
+  background-color: rgb(191, 64, 64, 0.7);
+  opacity: 0;
+  width: inherit;
+  transition: opacity 250ms linear;
+}
+
+#input-error.visible {
+  opacity: 1;
+  transition: opacity 250ms linear;
 }
 
 /*
@@ -116,21 +151,6 @@
   transform: unset;
   margin-top: 3px;
 }
-
-/*
- * primary input text
- */
-
-#main-input {
-  width: 100%;
-  color: #555;
-  padding: 6px 12px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing:border-box;
-}
-
 
 /*
  * spinner

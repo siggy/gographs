@@ -45,6 +45,7 @@ func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 			contentType = "text/plain; charset=utf-8"
 		} else {
 			rw.WriteHeader(http.StatusBadRequest)
+			rw.Write([]byte("svg or dot suffix required"))
 			return
 		}
 
@@ -52,6 +53,7 @@ func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 		tpl, err := route.GetPathTemplate()
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
+			rw.Write([]byte(err.Error()))
 			return
 		}
 		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
@@ -68,6 +70,7 @@ func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 			}
 			if err != nil {
 				rw.WriteHeader(http.StatusInternalServerError)
+				rw.Write([]byte(err.Error()))
 				return
 			}
 

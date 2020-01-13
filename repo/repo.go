@@ -117,7 +117,13 @@ func getRev(cache *cache.Cache, repo string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		err := fmt.Errorf("[%d]: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+		body, err := ioutil.ReadAll(resp.Body)
+		if err == nil {
+			err = fmt.Errorf("%s [%d]: %s", body, resp.StatusCode, http.StatusText(resp.StatusCode))
+		} else {
+			err = fmt.Errorf("[%d]: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+		}
+
 		log.Errorf("%s %s", url, err)
 		return "", err
 	}

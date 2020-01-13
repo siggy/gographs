@@ -33,7 +33,7 @@ Defaults to rendering this Go package.
 - Example: http://localhost:8888
 - Example: https://gographs.io
 
-### GET /?repo=[GO_REPO]
+### GET /?repo=[GO_REPO]?cluster=[false|true]
 
 Permalink to view a Go repo SVG.
 
@@ -49,21 +49,21 @@ Permalink to view an arbitrary SVG URL.
 - Example: http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
 - Example: https://gographs.io/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
 
-### GET /repo/[GITHUB_REPO].svg
+### GET /repo/[GITHUB_REPO].svg?cluster=[false|true]
 
 Go repo SVG direct link.
 
 - Content-Type: `image/svg+xml; charset=utf-8`
-- Example: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg
-- Example: https://gographs.io/repo/github.com/siggy/gographs.svg
+- Example: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg?cluster=false
+- Example: https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
 
-### GET /repo/[GITHUB_REPO].dot
+### GET /repo/[GITHUB_REPO].dot?cluster=[false|true]
 
 Go repo GraphViz DOT direct link.
 
 - Content-Type: `text/plain; charset=utf-8`
-- Example:  http://localhost:8888/repo/github.com/linkerd/linkerd2.dot
-- Example:  https://gographs.io/repo/github.com/siggy/gographs.dot
+- Example:  http://localhost:8888/repo/github.com/linkerd/linkerd2.dot?cluster=false
+- Example:  https://gographs.io/repo/github.com/siggy/gographs.dot?cluster=false
 
 ## Credits
 
@@ -73,15 +73,12 @@ deserve calling out:
 - [goda](https://github.com/loov/goda)
 - [SVGPan](https://github.com/ariutta/svg-pan-zoom)
 
-
-
 ## TODO
 
 - runtime flags
   - log-level
   - redis-server
 - firefox support
-- render fetch errors
 - prevent normal dragging on mobile
 - remove or repurpose localhost URLs in readme
 - refresh button

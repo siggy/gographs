@@ -291,10 +291,12 @@ window.addEventListener('load', (_) => {
     } else {
       url = new URL(this.value);
       if (!url.pathname.endsWith('.svg')) {
-        console.error('unrecognized input URL: ' + this.value);
+        showError('Input URL not an SVG: ' + this.value);
         return
       }
     }
+
+    hideError();
 
     const spinnerStart = startSpinner();
 
@@ -302,7 +304,6 @@ window.addEventListener('load', (_) => {
     .then(checkStatus)
     .then(resp => resp.blob())
     .then(blob => {
-
       let urlState = goRepo ? '/?repo='+this.value+'&cluster='+cluster : '/?url='+url;
       if (this.value === defaultInput && goRepo && !cluster) {
         // special root URL for default inputs
@@ -320,22 +321,12 @@ window.addEventListener('load', (_) => {
       stopSpinner(spinnerStart);
     })
     .catch(error => {
-      console.error('fetch failure:', error);
-
-      stopSpinner(spinnerStart);
+      error.response.text().then(text => {
+        showError(text);
+        stopSpinner(spinnerStart);
+      });
     });
   });
-
-  Array.from(document.getElementsByClassName('package-example')).forEach(
-    function(elm) {
-      elm.addEventListener('click', function(e) {
-        input.value = elm.text;
-        e.preventDefault();
-        input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
-        return false;
-      });
-    }
-  );
 
   document.getElementById('check-cluster').addEventListener('change', function(_) {
     input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
@@ -451,7 +442,7 @@ function initAutoComplete() {
     });
   })
   .catch(error => {
-    console.error('fetch failure:', error);
+    console.error(error);
   });
 }
 
@@ -468,4 +459,20 @@ function startSpinner() {
 function stopSpinner(timeout) {
   clearTimeout(timeout);
   document.getElementById('spinner').style.display = 'none';
+}
+
+/*
+ * error messages
+ */
+
+function showError(message) {
+  const elm = document.getElementById('input-error');
+  elm.innerHTML = message;
+  elm.classList.add("visible");
+  setTimeout(hideError, 5000);
+}
+
+function hideError() {
+  const elm = document.getElementById('input-error');
+  elm.classList.remove("visible");
 }

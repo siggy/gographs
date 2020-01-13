@@ -26,7 +26,7 @@
     </label>
 
     <div id="control-panel" class="floating-panel">
-      <input type="text" placeholder="github.com/siggy/gographs" id="main-input" aria-label="SVG Input">
+      <input type="text" placeholder="github.com/siggy/gographs" id="main-input" class="control-panel-module" aria-label="SVG Input">
       <div id="check-cluster-input">
         <input type="checkbox" id="check-cluster">
         <label for="check-cluster">Cluster</label>
@@ -37,26 +37,7 @@
       <a id="external-repo"  class="external-link" target="_blank">repo <i class="fa fa-external-link"></i></a>
       <a id="external-godoc" class="external-link" target="_blank">godoc<i class="fa fa-external-link"></i></a>
 
-      <ul>
-        <li>
-          <a class="package-example" href="/repo/github.com/loov/goda.svg">github.com/loov/goda</a>
-        </li>
-        <li>
-          <a class="package-example" href="/repo/github.com/sirupsen/logrus.svg">github.com/sirupsen/logrus</a>
-        </li>
-        <li>
-          <a class="package-example" href="/repo/github.com/gorilla/mux.svg">github.com/gorilla/mux</a>
-        </li>
-        <li>
-          <a class="package-example" href="/repo/github.com/prometheus/prometheus.svg">github.com/prometheus/prometheus</a>
-        </li>
-        <li>
-          <a class="package-example" href="/repo/github.com/linkerd/linkerd2.svg">github.com/linkerd/linkerd2</a>
-        </li>
-        <li>
-          <a class="package-example" href="https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg">https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg</a>
-        </li>
-      </ul>
+      <div id="input-error" class="control-panel-module"></div>
     </div>
 
     <object id="main-svg" class="main" type="image/svg+xml">
@@ -69,7 +50,7 @@
 
     <svg id="scope-container" class="thumb floating-panel">
       <g>
-        <rect id="scope" fill="red" fill-opacity="0.1" stroke="red" stroke-width="2px" x="0" y="0" width="0" height="0"/>
+        <rect id="scope" fill="#a8c5e2" fill-opacity="0.1" stroke="#a8c5e2" stroke-width="2px" x="0" y="0" width="0" height="0"/>
       </g>
     </svg>
 
