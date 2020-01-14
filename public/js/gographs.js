@@ -2,6 +2,22 @@
 
 const defaultInput = 'github.com/linkerd/linkerd2';
 
+const DOM = {
+  checkCluster:      document.getElementById('check-cluster'),
+  checkClusterInput: document.getElementById('check-cluster-input'),
+  externalDot:       document.getElementById('external-dot'),
+  externalGoDoc:     document.getElementById('external-godoc'),
+  externalRepo:      document.getElementById('external-repo'),
+  externalSvg:       document.getElementById('external-svg'),
+  inputError:        document.getElementById('input-error'),
+  mainInput:         document.getElementById('main-input'),
+  mainSvg:           document.getElementById('main-svg'),
+  scope:             document.getElementById('scope'),
+  scopeContainer:    document.getElementById('scope-container'),
+  spinner:           document.getElementById('spinner'),
+  thumbSvg:          document.getElementById('thumb-svg'),
+};
+
 function between(val, a, b) {
   if (a < b) {
     return Math.max(a, Math.min(val, b));
@@ -24,31 +40,25 @@ function loadSvg(svgHref, goRepo, blob) {
   // createObjectURL() must be coupled with revokeObjectURL(). ownership
   // of svgUrl passes from here to main-svg to thumb-svg.
   const svgUrl = URL.createObjectURL(blob)
-  document.getElementById('main-svg').data = svgUrl;
+  DOM.mainSvg.data = svgUrl;
 
-  const externalSvg = document.getElementById('external-svg');
-  const externalDot = document.getElementById('external-dot');
-  const externalRepo = document.getElementById('external-repo');
-  const externalGoDoc = document.getElementById('external-godoc');
-  const checkCluster = document.getElementById('check-cluster-input');
-
-  externalSvg.href = svgHref;
-  externalSvg.style.display = 'block';
+  DOM.externalSvg.href = svgHref;
+  DOM.externalSvg.style.display = 'block';
 
   if (goRepo) {
-    externalDot.href = svgHref.replace('.svg', '.dot');
-    externalRepo.href = "https://"+goRepo;
-    externalGoDoc.href = "https://godoc.org/" + goRepo;
+    DOM.externalDot.href = svgHref.replace('.svg', '.dot');
+    DOM.externalRepo.href = "https://"+goRepo;
+    DOM.externalGoDoc.href = "https://godoc.org/" + goRepo;
 
-    externalDot.style.display = 'block';
-    externalRepo.style.display = 'block';
-    externalGoDoc.style.display = 'block';
-    checkCluster.style.display = 'block';
+    DOM.externalDot.style.display = 'block';
+    DOM.externalRepo.style.display = 'block';
+    DOM.externalGoDoc.style.display = 'block';
+    DOM.checkClusterInput.style.display = 'block';
   } else {
-    externalDot.style.display = 'none';
-    externalRepo.style.display = 'none';
-    externalGoDoc.style.display = 'none';
-    checkCluster.style.display = 'none';
+    DOM.externalDot.style.display = 'none';
+    DOM.externalRepo.style.display = 'none';
+    DOM.externalGoDoc.style.display = 'none';
+    DOM.checkClusterInput.style.display = 'none';
   }
 }
 
@@ -71,11 +81,10 @@ function updateThumbScope() {
   scopeWidth = Math.max(0.1, scopeWidth-2);
   scopeHeight = Math.max(0.1, scopeHeight-2);
 
-  const scope = document.getElementById('scope');
-  scope.setAttribute('x', scopeX);
-  scope.setAttribute('y', scopeY);
-  scope.setAttribute('width', scopeWidth);
-  scope.setAttribute('height', scopeHeight);
+  DOM.scope.setAttribute('x', scopeX);
+  DOM.scope.setAttribute('y', scopeY);
+  DOM.scope.setAttribute('width', scopeWidth);
+  DOM.scope.setAttribute('height', scopeHeight);
 };
 
 function updateMainZoomPan(e){
@@ -83,8 +92,8 @@ function updateMainZoomPan(e){
     return false;
   }
 
-  const dim = document.getElementById('thumb-svg').getBoundingClientRect();
-  const scopeDim = document.getElementById('scope').getBoundingClientRect();
+  const dim = DOM.thumbSvg.getBoundingClientRect();
+  const scopeDim = DOM.scope.getBoundingClientRect();
 
   const mainToThumbZoomRatio =  window.main.getSizes().realZoom / window.thumb.getSizes().realZoom;
 
@@ -97,10 +106,7 @@ function updateMainZoomPan(e){
 }
 
 function resize(_) {
-  const scopeContainer = document.getElementById('scope-container');
-  const thumbSvg = document.getElementById('thumb-svg');
-
-  scopeContainer.setAttribute('width', thumbSvg.clientWidth);
+  DOM.scopeContainer.setAttribute('width', DOM.thumbSvg.clientWidth);
 
   window.main.resize();
   window.main.reset();
@@ -137,13 +143,10 @@ function bindThumbnail(main, thumb){
 
   window.addEventListener('resize', resize);
 
-  const scopeContainer = document.getElementById('scope-container');
-  const thumbSvg = document.getElementById('thumb-svg');
-
   // set scope-container to match size of thumbnail svg's 'width: auto'
-  scopeContainer.setAttribute('width', thumbSvg.clientWidth);
+  DOM.scopeContainer.setAttribute('width', DOM.thumbSvg.clientWidth);
 
-  scopeContainer.addEventListener('mousedown', scopeMouseDown);
+  DOM.scopeContainer.addEventListener('mousedown', scopeMouseDown);
 
   window.main.setOnZoom(function(_){
     updateThumbScope();
@@ -156,19 +159,16 @@ function bindThumbnail(main, thumb){
   updateThumbScope();
 }
 
-document.getElementById('scope-container').addEventListener('load', function(){
+DOM.scopeContainer.addEventListener('load', function(){
   this.addEventListener(
     'wheel',
     function wheelZoom(e) {
-      const mainSvg = document.getElementById('main-svg');
-      const thumbSvg = document.getElementById('thumb-svg');
-
       Object.defineProperties(e, {
-        clientX: { value: mainSvg.offsetWidth * e.offsetX / thumbSvg.offsetWidth },
-        clientY: { value: mainSvg.offsetHeight * e.offsetY / thumbSvg.offsetHeight },
+        clientX: { value: DOM.mainSvg.offsetWidth * e.offsetX / DOM.thumbSvg.offsetWidth },
+        clientY: { value: DOM.mainSvg.offsetHeight * e.offsetY / DOM.thumbSvg.offsetHeight },
       });
 
-      mainSvg.contentDocument.querySelector('svg').dispatchEvent(
+      DOM.mainSvg.contentDocument.querySelector('svg').dispatchEvent(
         new WheelEvent(e.type, e)
       );
 
@@ -179,7 +179,7 @@ document.getElementById('scope-container').addEventListener('load', function(){
   );
 });
 
-document.getElementById('main-svg').addEventListener('load', function(){
+DOM.mainSvg.addEventListener('load', function(){
   const mainSvg = this.contentDocument.querySelector('svg');
   if (!mainSvg) {
     console.debug('no svg loaded');
@@ -188,7 +188,7 @@ document.getElementById('main-svg').addEventListener('load', function(){
 
   // This passes ownership of the objectURL to thumb-svg, which will be
   // responsible for calling revokeObjectURL().
-  document.getElementById('thumb-svg').data = this.data;
+  DOM.thumbSvg.data = this.data;
 
   mainSvg.addEventListener(
     'wheel',
@@ -235,7 +235,7 @@ document.getElementById('main-svg').addEventListener('load', function(){
   bindThumbnail(main, undefined);
 })
 
-document.getElementById('thumb-svg').addEventListener('load', function(){
+DOM.thumbSvg.addEventListener('load', function(){
   setTimeout(function() {
     // Delay revoking the temporary blob URL. This should not be necessary, but
     // is a workaround to ensure main-svg and thumb-svg successfully load the
@@ -273,9 +273,7 @@ document.getElementById('thumb-svg').addEventListener('load', function(){
  */
 
 window.addEventListener('load', (_) => {
-  const input = document.getElementById('main-input');
-
-  input.addEventListener('keyup', function(event) {
+  DOM.mainInput.addEventListener('keyup', function(event) {
     if (event.keyCode !== 13) {
       return
     }
@@ -285,7 +283,7 @@ window.addEventListener('load', (_) => {
       null;
 
     let url;
-    const cluster = document.getElementById('check-cluster').checked;
+    const cluster = DOM.checkCluster.checked;
     if (goRepo) {
       url = new URL('/repo/' + this.value + '.svg?cluster=' + cluster, window.location.origin);
     } else {
@@ -328,12 +326,12 @@ window.addEventListener('load', (_) => {
     });
   });
 
-  document.getElementById('check-cluster').addEventListener('change', function(_) {
-    input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+  DOM.checkCluster.addEventListener('change', function(_) {
+    DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
   });
 
   updateInputsFromUrl();
-  input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+  DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
 
   initAutoComplete();
 });
@@ -341,29 +339,26 @@ window.addEventListener('load', (_) => {
 window.onpopstate = function(event) {
   updateInputsFromUrl();
 
-  const input = document.getElementById('main-input');
-  if (input.value !== '' && event.state && event.state.blob) {
+  if (DOM.mainInput.value !== '' && event.state && event.state.blob) {
     loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
   } else {
-    input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+    DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
   }
 }
 
 function updateInputsFromUrl() {
-  const input = document.getElementById('main-input');
-
   const searchParams = new URLSearchParams(window.location.search);
   if (searchParams.has('repo')) {
     // /?repo=github.com/siggy/gographs&cluster=false
-    input.value = searchParams.get('repo');
-    document.getElementById('check-cluster').checked = searchParams.get('cluster') === 'true';
+    DOM.mainInput.value = searchParams.get('repo');
+    DOM.checkCluster.checked = searchParams.get('cluster') === 'true';
   } else if (searchParams.has('url')) {
     // /?url=http://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
-    input.value = searchParams.get('url');
+    DOM.mainInput.value = searchParams.get('url');
   } else {
     // unrecognized URL, reset everything to default
-    input.value = defaultInput;
-    document.getElementById('check-cluster').checked = false;
+    DOM.mainInput.value = defaultInput;
+    DOM.checkCluster.checked = false;
   }
 }
 
@@ -409,8 +404,6 @@ function captureMouseEvents(e) {
  */
 
 function initAutoComplete() {
-  const input = document.getElementById('main-input');
-
   fetch('/top-repos')
   .then(checkStatus)
   .then(resp => resp.json())
@@ -436,7 +429,7 @@ function initAutoComplete() {
           // the input element also handles keyboard enter, skip this one.
           return
         }
-        input.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+        DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
         e.preventDefault();
       },
     });
@@ -452,13 +445,13 @@ function initAutoComplete() {
 
 function startSpinner() {
   return setTimeout(function() {
-    document.getElementById('spinner').style.display = 'flex';
+    DOM.spinner.style.display = 'flex';
   }, 250);
 }
 
 function stopSpinner(timeout) {
   clearTimeout(timeout);
-  document.getElementById('spinner').style.display = 'none';
+  DOM.spinner.style.display = 'none';
 }
 
 /*
@@ -466,13 +459,11 @@ function stopSpinner(timeout) {
  */
 
 function showError(message) {
-  const elm = document.getElementById('input-error');
-  elm.innerHTML = message;
-  elm.classList.add("visible");
+  DOM.inputError.innerHTML = message;
+  DOM.inputError.classList.add("visible");
   setTimeout(hideError, 5000);
 }
 
 function hideError() {
-  const elm = document.getElementById('input-error');
-  elm.classList.remove("visible");
+  DOM.inputError.classList.remove("visible");
 }
