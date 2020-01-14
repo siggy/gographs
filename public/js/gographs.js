@@ -3,6 +3,7 @@
 const defaultInput = 'github.com/linkerd/linkerd2';
 
 const DOM = {
+  // https://magnushoff.com/blog/dependency-free-javascript/
   checkCluster:      document.getElementById('check-cluster'),
   checkClusterInput: document.getElementById('check-cluster-input'),
   externalDot:       document.getElementById('external-dot'),
@@ -18,12 +19,270 @@ const DOM = {
   thumbSvg:          document.getElementById('thumb-svg'),
 };
 
+/*
+ * window.onload
+ */
+
+window.addEventListener('load', (_) => {
+  DOM.checkCluster.addEventListener('change', function(_) {
+    DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+  });
+
+  updateInputsFromUrl();
+  DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+
+  initAutoComplete();
+});
+
+window.onpopstate = function(event) {
+  updateInputsFromUrl();
+
+  if (DOM.mainInput.value !== '' && event.state && event.state.blob) {
+    loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
+  } else {
+    DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+  }
+}
+
+function updateInputsFromUrl() {
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.has('repo')) {
+    // /?repo=github.com/siggy/gographs&cluster=false
+    DOM.mainInput.value = searchParams.get('repo');
+    DOM.checkCluster.checked = searchParams.get('cluster') === 'true';
+  } else if (searchParams.has('url')) {
+    // /?url=http://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
+    DOM.mainInput.value = searchParams.get('url');
+  } else {
+    // unrecognized URL, reset everything to default
+    DOM.mainInput.value = defaultInput;
+    DOM.checkCluster.checked = false;
+  }
+}
+
+/*
+ * DOM element EventListeners
+ */
+
+DOM.mainInput.addEventListener('keyup', function(event) {
+  if (event.keyCode !== 13) {
+    return
+  }
+
+  if (this.value === "") {
+    this.value = defaultInput;
+  }
+
+  const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://')) ?
+    this.value :
+    null;
+
+  let url;
+  const cluster = DOM.checkCluster.checked;
+  if (goRepo) {
+    url = new URL('/repo/' + this.value + '.svg?cluster=' + cluster, window.location.origin);
+  } else {
+    url = new URL(this.value);
+    if (!url.pathname.endsWith('.svg')) {
+      showError('Input URL not an SVG: ' + this.value);
+      return
+    }
+  }
+
+  hideError();
+
+  const spinner = startSpinner();
+
+  fetch(url)
+  .then(checkStatus)
+  .then(resp => resp.blob())
+  .then(blob => {
+    let urlState = goRepo ? '/?repo='+this.value+'&cluster='+cluster : '/?url='+url;
+    if (this.value === defaultInput && goRepo && !cluster) {
+      // special root URL for default inputs
+      urlState = '/';
+    }
+
+    history.pushState(
+      { svgHref: url.href, goRepo: goRepo, blob: blob },
+      this.value,
+      urlState,
+    );
+
+    loadSvg(url.href, goRepo, blob);
+
+    stopSpinner(spinner);
+  })
+  .catch(error => {
+    error.response.text().then(text => {
+      showError(text);
+      stopSpinner(spinner);
+    });
+  });
+});
+
+DOM.mainSvg.addEventListener('load', function(){
+  // This passes ownership of the objectURL to thumb-svg, which will be
+  // responsible for calling revokeObjectURL().
+  DOM.thumbSvg.data = this.data;
+
+  const svg = this.contentDocument.querySelector('svg');
+  if (!svg) {
+    console.debug('no svg loaded');
+    return
+  }
+
+  svg.addEventListener(
+    'wheel',
+    function wheelZoom(e) {e.preventDefault()},
+    { passive: false }
+  );
+
+  const mainSvgPanZoom = svgPanZoom(svg, {
+    viewportSelector: '#main-svg',
+    panEnabled: true,
+    controlIconsEnabled: false,
+    zoomEnabled: true,
+    dblClickZoomEnabled: true,
+    mouseWheelZoomEnabled: true,
+    preventMouseEventsDefault: false,
+    zoomScaleSensitivity: 0.2,
+    minZoom: 1,
+    maxZoom: 20,
+    fit: true,
+    contain: false,
+    center: true,
+    refreshRate: 'auto',
+    beforeZoom: null,
+    onZoom: null,
+    beforePan: beforePan,
+    onPan: null,
+    customEventsHandler: null,
+    eventsListenerElement: null,
+    onUpdatedCTM: null,
+  });
+
+  bindThumbnail(mainSvgPanZoom, undefined);
+})
+
+DOM.thumbSvg.addEventListener('load', function(){
+  setTimeout(function() {
+    // Delay revoking the temporary blob URL. This should not be necessary, but
+    // is a workaround to ensure main-svg and thumb-svg successfully load the
+    // URL. May be related to:
+    // https://stackoverflow.com/a/30708820/7868488
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=827932
+    URL.revokeObjectURL(this.data);
+  }, 1000);
+
+  const svg = this.contentDocument.querySelector('svg');
+  if (!svg) {
+    console.debug('no svg loaded');
+    return
+  }
+
+  svg.addEventListener(
+    'wheel',
+    function wheelZoom(e) {e.preventDefault()},
+    { passive: false }
+  );
+
+  const thumbSvgPanZoom = svgPanZoom(svg, {
+    panEnabled: false,
+    zoomEnabled: false,
+    controlIconsEnabled: false,
+    dblClickZoomEnabled: false,
+    preventMouseEventsDefault: true,
+  });
+
+  bindThumbnail(undefined, thumbSvgPanZoom);
+});
+
+DOM.scopeContainer.addEventListener(
+  'wheel',
+  function wheelZoom(e) {
+    const svg = DOM.mainSvg.contentDocument.querySelector('svg')
+    if (!svg) {
+      console.debug('no svg loaded');
+      return
+    }
+
+    Object.defineProperties(e, {
+      clientX: { value: DOM.mainSvg.offsetWidth * e.offsetX / DOM.thumbSvg.offsetWidth },
+      clientY: { value: DOM.mainSvg.offsetHeight * e.offsetY / DOM.thumbSvg.offsetHeight },
+    });
+
+    // forward wheel zooming from scopeContainer to svg
+    svg.dispatchEvent(
+      new WheelEvent(e.type, e)
+    );
+
+    e.preventDefault();
+    return false;
+  },
+  { passive: false }
+);
+
+/*
+ * Misc functions for updating state
+ */
+
+function bindThumbnail(main, thumb){
+  if (main) {
+    if (window.main) {
+      window.main.destroy();
+    }
+    window.main = main;
+  }
+  if (thumb) {
+    if (window.thumb) {
+      window.thumb.destroy();
+    }
+    window.thumb = thumb;
+  }
+
+  if (!window.main || !window.thumb) {
+    return;
+  }
+
+  // all function below this expect window.main and window.thumb to be set
+
+  window.addEventListener('resize', resize);
+
+  // set scope-container to match size of thumbnail svg's 'width: auto'
+  DOM.scopeContainer.setAttribute('width', DOM.thumbSvg.clientWidth);
+
+  DOM.scopeContainer.addEventListener('mousedown', scopeMouseDown);
+
+  window.main.setOnZoom(function(_){
+    updateThumbScope();
+  });
+
+  window.main.setOnPan(function(_){
+    updateThumbScope();
+  });
+
+  updateThumbScope();
+}
+
 function between(val, a, b) {
   if (a < b) {
     return Math.max(a, Math.min(val, b));
   } else {
     return Math.max(b, Math.min(val, a));
   }
+}
+
+function beforePan(_, newPan){
+  let sizes = this.getSizes();
+
+  const realWidth = sizes.viewBox.width * sizes.realZoom;
+  const realHeight = sizes.viewBox.height * sizes.realZoom;
+
+  return {
+    x: between(newPan.x, 0, sizes.width - realWidth),
+    y: between(newPan.y, 0, sizes.height - realHeight),
+  };
 }
 
 function checkStatus(response) {
@@ -119,247 +378,6 @@ function resize(_) {
 function scopeMouseDown(e) {
   captureMouseEvents(e);
   updateMainZoomPan(e);
-}
-
-function bindThumbnail(main, thumb){
-  if (main) {
-    if (window.main) {
-      window.main.destroy();
-    }
-    window.main = main;
-  }
-  if (thumb) {
-    if (window.thumb) {
-      window.thumb.destroy();
-    }
-    window.thumb = thumb;
-  }
-
-  if (!window.main || !window.thumb) {
-    return;
-  }
-
-  // all function below this expect window.main and window.thumb to be set
-
-  window.addEventListener('resize', resize);
-
-  // set scope-container to match size of thumbnail svg's 'width: auto'
-  DOM.scopeContainer.setAttribute('width', DOM.thumbSvg.clientWidth);
-
-  DOM.scopeContainer.addEventListener('mousedown', scopeMouseDown);
-
-  window.main.setOnZoom(function(_){
-    updateThumbScope();
-  });
-
-  window.main.setOnPan(function(_){
-    updateThumbScope();
-  });
-
-  updateThumbScope();
-}
-
-DOM.scopeContainer.addEventListener('load', function(){
-  this.addEventListener(
-    'wheel',
-    function wheelZoom(e) {
-      Object.defineProperties(e, {
-        clientX: { value: DOM.mainSvg.offsetWidth * e.offsetX / DOM.thumbSvg.offsetWidth },
-        clientY: { value: DOM.mainSvg.offsetHeight * e.offsetY / DOM.thumbSvg.offsetHeight },
-      });
-
-      DOM.mainSvg.contentDocument.querySelector('svg').dispatchEvent(
-        new WheelEvent(e.type, e)
-      );
-
-      e.preventDefault();
-      return false;
-    },
-    { passive: false }
-  );
-});
-
-DOM.mainSvg.addEventListener('load', function(){
-  const mainSvg = this.contentDocument.querySelector('svg');
-  if (!mainSvg) {
-    console.debug('no svg loaded');
-    return
-  }
-
-  // This passes ownership of the objectURL to thumb-svg, which will be
-  // responsible for calling revokeObjectURL().
-  DOM.thumbSvg.data = this.data;
-
-  mainSvg.addEventListener(
-    'wheel',
-    function wheelZoom(e) {e.preventDefault()},
-    { passive: false }
-  );
-
-  const beforePan = function(_, newPan){
-    let sizes = this.getSizes();
-
-    const realWidth = sizes.viewBox.width * sizes.realZoom;
-    const realHeight = sizes.viewBox.height * sizes.realZoom;
-
-    return {
-      x: between(newPan.x, 0, sizes.width - realWidth),
-      y: between(newPan.y, 0, sizes.height - realHeight),
-    };
-  }
-
-  const main = svgPanZoom(mainSvg, {
-    viewportSelector: '#main-svg',
-    panEnabled: true,
-    controlIconsEnabled: false,
-    zoomEnabled: true,
-    dblClickZoomEnabled: true,
-    mouseWheelZoomEnabled: true,
-    preventMouseEventsDefault: false,
-    zoomScaleSensitivity: 0.2,
-    minZoom: 1,
-    maxZoom: 20,
-    fit: true,
-    contain: false,
-    center: true,
-    refreshRate: 'auto',
-    beforeZoom: null,
-    onZoom: null,
-    beforePan: beforePan,
-    onPan: null,
-    customEventsHandler: null,
-    eventsListenerElement: null,
-    onUpdatedCTM: null,
-  });
-
-  bindThumbnail(main, undefined);
-})
-
-DOM.thumbSvg.addEventListener('load', function(){
-  setTimeout(function() {
-    // Delay revoking the temporary blob URL. This should not be necessary, but
-    // is a workaround to ensure main-svg and thumb-svg successfully load the
-    // URL. May be related to:
-    // https://stackoverflow.com/a/30708820/7868488
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=827932
-    URL.revokeObjectURL(this.data);
-  }, 1000);
-
-  const thumbSvg = this.contentDocument.querySelector('svg');
-  if (!thumbSvg) {
-    console.debug('no svg loaded');
-    return
-  }
-
-  thumbSvg.addEventListener(
-    'wheel',
-    function wheelZoom(e) {e.preventDefault()},
-    { passive: false }
-  );
-
-  const thumb = svgPanZoom(thumbSvg, {
-    panEnabled: false,
-    zoomEnabled: false,
-    controlIconsEnabled: false,
-    dblClickZoomEnabled: false,
-    preventMouseEventsDefault: true,
-  });
-
-  bindThumbnail(undefined, thumb);
-});
-
-/*
- * window.onload
- */
-
-window.addEventListener('load', (_) => {
-  DOM.mainInput.addEventListener('keyup', function(event) {
-    if (event.keyCode !== 13) {
-      return
-    }
-
-    const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://')) ?
-      this.value :
-      null;
-
-    let url;
-    const cluster = DOM.checkCluster.checked;
-    if (goRepo) {
-      url = new URL('/repo/' + this.value + '.svg?cluster=' + cluster, window.location.origin);
-    } else {
-      url = new URL(this.value);
-      if (!url.pathname.endsWith('.svg')) {
-        showError('Input URL not an SVG: ' + this.value);
-        return
-      }
-    }
-
-    hideError();
-
-    const spinnerStart = startSpinner();
-
-    fetch(url)
-    .then(checkStatus)
-    .then(resp => resp.blob())
-    .then(blob => {
-      let urlState = goRepo ? '/?repo='+this.value+'&cluster='+cluster : '/?url='+url;
-      if (this.value === defaultInput && goRepo && !cluster) {
-        // special root URL for default inputs
-        urlState = '/';
-      }
-
-      history.pushState(
-        { svgHref: url.href, goRepo: goRepo, blob: blob },
-        this.value,
-        urlState,
-      );
-
-      loadSvg(url.href, goRepo, blob);
-
-      stopSpinner(spinnerStart);
-    })
-    .catch(error => {
-      error.response.text().then(text => {
-        showError(text);
-        stopSpinner(spinnerStart);
-      });
-    });
-  });
-
-  DOM.checkCluster.addEventListener('change', function(_) {
-    DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
-  });
-
-  updateInputsFromUrl();
-  DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
-
-  initAutoComplete();
-});
-
-window.onpopstate = function(event) {
-  updateInputsFromUrl();
-
-  if (DOM.mainInput.value !== '' && event.state && event.state.blob) {
-    loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
-  } else {
-    DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
-  }
-}
-
-function updateInputsFromUrl() {
-  const searchParams = new URLSearchParams(window.location.search);
-  if (searchParams.has('repo')) {
-    // /?repo=github.com/siggy/gographs&cluster=false
-    DOM.mainInput.value = searchParams.get('repo');
-    DOM.checkCluster.checked = searchParams.get('cluster') === 'true';
-  } else if (searchParams.has('url')) {
-    // /?url=http://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
-    DOM.mainInput.value = searchParams.get('url');
-  } else {
-    // unrecognized URL, reset everything to default
-    DOM.mainInput.value = defaultInput;
-    DOM.checkCluster.checked = false;
-  }
 }
 
 /*
