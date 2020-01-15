@@ -24,12 +24,17 @@ const DOM = {
  */
 
 window.addEventListener('load', (_) => {
+  // TODO: AUTO?
+  // document.getElementById('control-toggle').checked = true;
+
+
+
   DOM.checkCluster.addEventListener('change', function(_) {
-    DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+    handleQuery();
   });
 
   updateInputsFromUrl();
-  DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+  handleQuery();
 
   initAutoComplete();
 });
@@ -40,7 +45,7 @@ window.onpopstate = function(event) {
   if (DOM.mainInput.value !== '' && event.state && event.state.blob) {
     loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
   } else {
-    DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+    handleQuery();
   }
 }
 
@@ -51,7 +56,7 @@ function updateInputsFromUrl() {
     DOM.mainInput.value = searchParams.get('repo');
     DOM.checkCluster.checked = searchParams.get('cluster') === 'true';
   } else if (searchParams.has('url')) {
-    // /?url=http://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
+    // /?url=https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
     DOM.mainInput.value = searchParams.get('url');
   } else {
     // unrecognized URL, reset everything to default
@@ -69,56 +74,7 @@ DOM.mainInput.addEventListener('keyup', function(event) {
     return
   }
 
-  if (this.value === "") {
-    this.value = defaultInput;
-  }
-
-  const goRepo = !(this.value.startsWith('http://') || this.value.startsWith('https://')) ?
-    this.value :
-    null;
-
-  let url;
-  const cluster = DOM.checkCluster.checked;
-  if (goRepo) {
-    url = new URL('/repo/' + this.value + '.svg?cluster=' + cluster, window.location.origin);
-  } else {
-    url = new URL(this.value);
-    if (!url.pathname.endsWith('.svg')) {
-      showError('Input URL not an SVG: ' + this.value);
-      return
-    }
-  }
-
-  hideError();
-
-  const spinner = startSpinner();
-
-  fetch(url)
-  .then(checkStatus)
-  .then(resp => resp.blob())
-  .then(blob => {
-    let urlState = goRepo ? '/?repo='+this.value+'&cluster='+cluster : '/?url='+url;
-    if (this.value === defaultInput && goRepo && !cluster) {
-      // special root URL for default inputs
-      urlState = '/';
-    }
-
-    history.pushState(
-      { svgHref: url.href, goRepo: goRepo, blob: blob },
-      this.value,
-      urlState,
-    );
-
-    loadSvg(url.href, goRepo, blob);
-
-    stopSpinner(spinner);
-  })
-  .catch(error => {
-    error.response.text().then(text => {
-      showError(text);
-      stopSpinner(spinner);
-    });
-  });
+  handleQuery();
 });
 
 DOM.mainSvg.addEventListener('load', function(){
@@ -190,9 +146,7 @@ DOM.thumbSvg.addEventListener('load', function(){
   const thumbSvgPanZoom = svgPanZoom(svg, {
     panEnabled: false,
     zoomEnabled: false,
-    controlIconsEnabled: false,
     dblClickZoomEnabled: false,
-    preventMouseEventsDefault: true,
   });
 
   bindThumbnail(undefined, thumbSvgPanZoom);
@@ -293,6 +247,59 @@ function checkStatus(response) {
     error.response = response
     throw error
   }
+}
+
+function handleQuery() {
+  if (DOM.mainInput.value === "") {
+    DOM.mainInput.value = defaultInput;
+  }
+
+  const goRepo = !(DOM.mainInput.value.startsWith('http://') || DOM.mainInput.value.startsWith('https://')) ?
+  DOM.mainInput.value :
+    null;
+
+  let url;
+  const cluster = DOM.checkCluster.checked;
+  if (goRepo) {
+    url = new URL('/repo/' + DOM.mainInput.value + '.svg?cluster=' + cluster, window.location.origin);
+  } else {
+    url = new URL(DOM.mainInput.value);
+    if (!url.pathname.endsWith('.svg')) {
+      showError('Input URL not an SVG: ' + DOM.mainInput.value);
+      return
+    }
+  }
+
+  hideError();
+
+  const spinner = startSpinner();
+
+  fetch(url)
+  .then(checkStatus)
+  .then(resp => resp.blob())
+  .then(blob => {
+    let urlState = goRepo ? '/?repo='+DOM.mainInput.value+'&cluster='+cluster : '/?url='+url;
+    if (DOM.mainInput.value === defaultInput && !cluster) {
+      // special root URL for default inputs
+      urlState = '/';
+    }
+
+    history.pushState(
+      { svgHref: url.href, goRepo: goRepo, blob: blob },
+      DOM.mainInput.value,
+      urlState,
+    );
+
+    loadSvg(url.href, goRepo, blob);
+
+    stopSpinner(spinner);
+  })
+  .catch(error => {
+    error.response.text().then(text => {
+      showError(text);
+      stopSpinner(spinner);
+    });
+  });
 }
 
 function loadSvg(svgHref, goRepo, blob) {
@@ -447,7 +454,7 @@ function initAutoComplete() {
           // the input element also handles keyboard enter, skip this one.
           return
         }
-        DOM.mainInput.dispatchEvent(new KeyboardEvent('keyup', { keyCode: 13}));
+        handleQuery();
         e.preventDefault();
       },
     });
