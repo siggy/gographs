@@ -24,17 +24,12 @@ const DOM = {
  */
 
 window.addEventListener('load', (_) => {
-  // TODO: AUTO?
-  // document.getElementById('control-toggle').checked = true;
-
-
-
   DOM.checkCluster.addEventListener('change', function(_) {
-    handleQuery();
+    handleInput();
   });
 
   updateInputsFromUrl();
-  handleQuery();
+  handleInput();
 
   initAutoComplete();
 });
@@ -45,7 +40,7 @@ window.onpopstate = function(event) {
   if (DOM.mainInput.value !== '' && event.state && event.state.blob) {
     loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
   } else {
-    handleQuery();
+    handleInput();
   }
 }
 
@@ -74,7 +69,7 @@ DOM.mainInput.addEventListener('keyup', function(event) {
     return
   }
 
-  handleQuery();
+  handleInput();
 });
 
 DOM.mainSvg.addEventListener('load', function(){
@@ -249,23 +244,23 @@ function checkStatus(response) {
   }
 }
 
-function handleQuery() {
-  if (DOM.mainInput.value === "") {
-    DOM.mainInput.value = defaultInput;
-  }
+function handleInput() {
+  const input = (DOM.mainInput.value !== "") ?
+    DOM.mainInput.value :
+    defaultInput;
+  const cluster = DOM.checkCluster.checked;
 
-  const goRepo = !(DOM.mainInput.value.startsWith('http://') || DOM.mainInput.value.startsWith('https://')) ?
-  DOM.mainInput.value :
+  const goRepo = !(input.startsWith('http://') || input.startsWith('https://')) ?
+    input :
     null;
 
   let url;
-  const cluster = DOM.checkCluster.checked;
   if (goRepo) {
-    url = new URL('/repo/' + DOM.mainInput.value + '.svg?cluster=' + cluster, window.location.origin);
+    url = new URL('/repo/' + input + '.svg?cluster=' + cluster, window.location.origin);
   } else {
-    url = new URL(DOM.mainInput.value);
+    url = new URL(input);
     if (!url.pathname.endsWith('.svg')) {
-      showError('Input URL not an SVG: ' + DOM.mainInput.value);
+      showError('Input URL not an SVG: ' + input);
       return
     }
   }
@@ -278,15 +273,15 @@ function handleQuery() {
   .then(checkStatus)
   .then(resp => resp.blob())
   .then(blob => {
-    let urlState = goRepo ? '/?repo='+DOM.mainInput.value+'&cluster='+cluster : '/?url='+url;
-    if (DOM.mainInput.value === defaultInput && !cluster) {
+    let urlState = goRepo ? '/?repo='+input+'&cluster='+cluster : '/?url='+url;
+    if (input === defaultInput && !cluster) {
       // special root URL for default inputs
       urlState = '/';
     }
 
     history.pushState(
       { svgHref: url.href, goRepo: goRepo, blob: blob },
-      DOM.mainInput.value,
+      input,
       urlState,
     );
 
@@ -454,7 +449,7 @@ function initAutoComplete() {
           // the input element also handles keyboard enter, skip this one.
           return
         }
-        handleQuery();
+        handleInput();
         e.preventDefault();
       },
     });
