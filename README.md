@@ -75,6 +75,8 @@ deserve calling out:
 
 ## TODO
 
+- better fonts on svg
+- size control-panel
 - runtime flags
   - log-level
   - redis-server

@@ -238,7 +238,17 @@ func runGoda(dir string, cluster bool) (string, error) {
 }
 
 func dotToSVG(dot string) (string, error) {
-	command := exec.Command("dot", "-Gsize=13,7!", "-Tsvg")
+	command := exec.Command(
+		"dot",
+		"-Gsize=13,7!",
+		"-Tsvg",
+		"-Gfontname=Roboto,Arial,sans-serif",
+		"-Nfontname=Roboto,Arial,sans-serif",
+		"-Efontname=Roboto,Arial,sans-serif",
+		"-Gfontsize=20",
+		"-Nfontsize=20",
+		"-Efontsize=20",
+	)
 	command.Stdin = strings.NewReader(dot)
 	var stderr bytes.Buffer
 	command.Stderr = &stderr

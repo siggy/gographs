@@ -48,7 +48,7 @@ body {
 
  #control-panel {
   top: 0;
-  height: 25%;
+  height: 50px;
   width: 500px;
   padding: 6px;
   background: rgba(225, 235, 245, 0.5);
