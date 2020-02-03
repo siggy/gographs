@@ -9,6 +9,7 @@ import (
 
 type Cache struct {
 	client *redis.Client
+	log    *log.Entry
 }
 
 const (
@@ -47,8 +48,10 @@ const (
 // TODO: per-revision caching
 
 func New() (*Cache, error) {
+	addr := "localhost:6379"
+
 	client := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: addr,
 	})
 
 	_, err := client.Ping().Result()
@@ -58,57 +61,66 @@ func New() (*Cache, error) {
 
 	return &Cache{
 		client: client,
+		log: log.WithFields(
+			log.Fields{
+				"cache": addr,
+			},
+		),
 	}, nil
 }
 
 func (c *Cache) SetURL(k, v string) {
 	if err := c.client.HSet(urlHash, k, v).Err(); err != nil {
-		log.Errorf("SetURL failed: %s", err)
+		c.log.Errorf("SetURL failed: %s", err)
 	}
 }
 
 func (c *Cache) GetURL(k string) (string, error) {
-	return c.client.HGet(urlHash, k).Result()
+	return c.hget(urlHash, k)
 }
 
 func (c *Cache) SetSVG(repo string, cluster bool, svg string) {
 	if err := c.client.HSet(svgHash, repoKey(repo, cluster), svg).Err(); err != nil {
-		log.Errorf("SetSVG failed: %s", err)
+		c.log.Errorf("SetSVG failed: %s", err)
 	}
 }
 
 func (c *Cache) GetSVG(repo string, cluster bool) (string, error) {
-	return c.client.HGet(svgHash, repoKey(repo, cluster)).Result()
+	return c.hget(svgHash, repoKey(repo, cluster))
 }
 
 func (c *Cache) SetDOT(repo string, cluster bool, dot string) {
 	if err := c.client.HSet(dotHash, repoKey(repo, cluster), dot).Err(); err != nil {
-		log.Errorf("SetDOT failed: %s", err)
+		c.log.Errorf("SetDOT failed: %s", err)
 	}
 }
 
 func (c *Cache) GetDOT(repo string, cluster bool) (string, error) {
-	return c.client.HGet(dotHash, repoKey(repo, cluster)).Result()
+	return c.hget(dotHash, repoKey(repo, cluster))
 }
 
 func (c *Cache) SetRepoVersion(repo string, version string) {
 	if err := c.client.HSet(repoVersionHash, repo, version).Err(); err != nil {
-		log.Errorf("SetRepoVersion failed: %s", err)
+		c.log.Errorf("SetRepoVersion failed: %s", err)
 	}
 }
 
 func (c *Cache) GetRepoVersion(repo string) (string, error) {
-	return c.client.HGet(repoVersionHash, repo).Result()
+	return c.hget(repoVersionHash, repo)
 }
 
 func (c *Cache) SetRepoDir(repo string, version string, repoDir string) {
 	if err := c.client.HSet(repoDirHash, repoDirKey(repo, version), repoDir).Err(); err != nil {
-		log.Errorf("SetRepoDir failed: %s", err)
+		c.log.Errorf("SetRepoDir failed: %s", err)
 	}
 }
 
 func (c *Cache) GetRepoDir(repo string, version string) (string, error) {
-	return c.client.HGet(repoDirHash, repoDirKey(repo, version)).Result()
+	return c.hget(repoDirHash, repoDirKey(repo, version))
+}
+
+func (c *Cache) DelRepoDir(repo string, version string) (int64, error) {
+	return c.hdel(repoDirHash, repoDirKey(repo, version))
 }
 
 func (c *Cache) RepoScoreIncr(repo string) {
@@ -127,6 +139,16 @@ func (c *Cache) RepoScores() ([]string, error) {
 	}
 
 	return cmd.Val(), nil
+}
+
+func (c *Cache) hget(key, field string) (string, error) {
+	c.log.Debugf("hget[%s,%s]", key, field)
+	return c.client.HGet(key, field).Result()
+}
+
+func (c *Cache) hdel(key, field string) (int64, error) {
+	c.log.Debugf("hdel[%s,%s]", key, field)
+	return c.client.HDel(key, field).Result()
 }
 
 func repoKey(repo string, cluster bool) string {

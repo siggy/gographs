@@ -75,9 +75,7 @@ deserve calling out:
 
 ## TODO
 
-- on drag mouseup, don't open godoc link
 - default to this repo
-- fix cluster checkbox not working
 - "refresh now", show cache age
 - better fonts on svg
 - size control-panel
@@ -93,3 +91,4 @@ deserve calling out:
 - show progress during repo compile
 - generic svg and dot support, paste and url
 - consider capturing all mouse scrolling over every element
+- on drag mouseup, don't open godoc link

@@ -83,6 +83,9 @@ func GenDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 
 	dot, err = runGoda(codeDir, cluster)
 	if err != nil {
+		// goda command failed, delete repo dir
+		go cache.DelRepoDir(repo, rev)
+
 		log.Errorf("goda failed: %s", err)
 		return "", err
 	}
@@ -99,7 +102,7 @@ func getRev(cache *cache.Cache, repo string) (string, error) {
 	}
 
 	url := fmt.Sprintf("https://proxy.golang.org/%s/@v/master.info", repo)
-	log.Debugf("requesting: %s", url)
+	log.Debugf("requesting revision: %s", url)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -148,7 +151,7 @@ func getRev(cache *cache.Cache, repo string) (string, error) {
 
 func downloadZip(repo string, rev string) ([]byte, error) {
 	repoURL := fmt.Sprintf("https://proxy.golang.org/%s/@v/%s.zip", repo, rev)
-	log.Debugf("requesting: %s", repoURL)
+	log.Debugf("requesting zip: %s", repoURL)
 
 	rsp2, err := http.Get(repoURL)
 	if err != nil {
@@ -224,17 +227,27 @@ func runGoda(dir string, cluster bool) (string, error) {
 	}
 	args = append(args, fmt.Sprintf("./...:root"))
 
-	command := exec.Command("goda", args...)
-	command.Dir = dir
+	cmd := exec.Command("goda", args...)
+	cmd.Dir = dir
 
-	log.Debugf("running: %s", command)
-	dot, err := command.Output()
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	log.Debugf("running goda: %s", cmd)
+	err := cmd.Run()
 	if err != nil {
 		log.Errorf("goda cmd failed: %s", err)
-		return "", nil
+		return "", err
 	}
 
-	return string(dot), nil
+	if len(stderr.Bytes()) != 0 {
+		err := fmt.Errorf("goda cmd returned stderr: %s", string(stderr.Bytes()))
+		log.Error(err)
+		return "", err
+	}
+
+	return string(stdout.Bytes()), nil
 }
 
 func dotToSVG(dot string) (string, error) {
@@ -253,7 +266,7 @@ func dotToSVG(dot string) (string, error) {
 	var stderr bytes.Buffer
 	command.Stderr = &stderr
 
-	log.Debugf("running: %s", command)
+	log.Debugf("running dot: %s", command)
 	svg, err := command.Output()
 	if err != nil {
 		log.Errorf("dot cmd failed: %s", err)
