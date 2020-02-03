@@ -27,7 +27,7 @@ func Start(c *cache.Cache, addr string) error {
 	router.HandleFunc("/top-repos", mkTopReposHandler(c))
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
-	log.Infof("serving on %s", addr)
+	log.Infof("Web server listening")
 
 	return http.ListenAndServe(addr, router)
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/go-redis/redis/v7"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,13 +20,13 @@ const (
 	// github.com/siggy/gographs
 	// =>
 	// v1.8.2-0.20200110142541-64194f7d45cb
-	repoVersionHash = "repo-version"
+	repoVersionHash = "repoversion"
 
 	// repo-dir[repo]
 	// github.com/siggy/gographs
 	// =>
 	// /tmp/foo
-	repoDirHash = "repo-dir"
+	repoDirHash = "repodir"
 
 	// dot[repo+cluster]
 	// github.com/siggy/gographs+false
@@ -42,7 +44,7 @@ const (
 	// github.com/siggy/gographs
 	// =>
 	// [numeric popularity score]
-	repoScores = "repo-scores"
+	repoScores = "reposcores"
 )
 
 // New initializes a new cache client.
@@ -56,13 +58,19 @@ func New(addr string) (*Cache, error) {
 		return nil, err
 	}
 
+	log := log.WithFields(
+		log.Fields{
+			"cache": addr,
+		},
+	)
+
+	registerGauges(client)
+
+	log.Infof("Cache initialized")
+
 	return &Cache{
 		client: client,
-		log: log.WithFields(
-			log.Fields{
-				"cache": addr,
-			},
-		),
+		log:    log,
 	}, nil
 }
 
@@ -191,6 +199,49 @@ func (c *Cache) hset(key, field string, value interface{}) error {
 func (c *Cache) hdel(key, field string) (int64, error) {
 	c.log.Debugf("hdel[%s,%s]", key, field)
 	return c.client.HDel(key, field).Result()
+}
+
+func registerGauges(client *redis.Client) {
+	registerHashGauge(client, repoVersionHash)
+	registerHashGauge(client, repoDirHash)
+	registerHashGauge(client, dotHash)
+	registerHashGauge(client, svgHash)
+	registerSetGauge(client, repoScores)
+}
+
+func registerHashGauge(client *redis.Client, key string) {
+	registerGauge(
+		func() float64 {
+			size, _ := client.HLen(key).Result()
+			return float64(size)
+		},
+		key,
+	)
+}
+
+func registerSetGauge(client *redis.Client, key string) {
+	registerGauge(
+		func() float64 {
+			size, _ := client.ZCount(key, "-inf", "+inf").Result()
+			return float64(size)
+		},
+		key,
+	)
+}
+
+func registerGauge(function func() float64, key string) {
+	promauto.NewGaugeFunc(
+		prometheus.GaugeOpts{
+			Namespace: "cache",
+			Subsystem: "size",
+			Name:      key,
+			Help: fmt.Sprintf(
+				"Size of the %s cache",
+				key,
+			),
+		},
+		function,
+	)
 }
 
 func repoKey(repo string, cluster bool) string {
