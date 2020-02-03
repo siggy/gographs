@@ -1,8 +1,29 @@
 package repo
 
-// curl https://proxy.golang.org/github.com/siggy/heypic/@v/master.info
-// curl -O https://proxy.golang.org/github.com/siggy/heypic/@v/v0.0.0-20180506171301-e384f182b391.zip | unzip
-// goda graph github.com/linkerd/linkerd2...:root | dot -Tsvg -o graph2.svg
+// This package takes GoLang repos as input and outputs SVG and DOT files:
+//
+// 1. repo => revision
+//    curl https://proxy.golang.org/github.com/siggy/gographs/@v/master.info
+// 2. revision => dir
+//    curl -O https://proxy.golang.org/github.com/siggy/gographs/@v/v0.0.0-20180506171301-e384f182b391.zip | unzip
+// 3. dir => dot
+//    goda graph -short -cluster=false github.com/siggy/gographs...:root
+// 4. dot => svg
+//    echo "..." | dot -Tsvg -o graph2.svg
+//
+// Nested control-flow accommodates caching at all levels:
+//
+// ToSVG(repo) {
+//   ToDOT(repo) {
+//     toDir(repo) {
+//       toRev(repo) {} => Rev
+//       revToZip(rev) {} => Zip
+//       zipToDir(zip) {} => Dir
+//     } => Dir
+//     dirToDot(Dir) {} => DOT
+//   } => DOT
+//   dotToSVG(DOT) {} => SVG
+// } => SVG
 
 import (
 	"archive/zip"
@@ -27,13 +48,14 @@ type revInfo struct {
 	Time    time.Time `json:"Time"`
 }
 
-func GenSVG(cache *cache.Cache, repo string, cluster bool) (string, error) {
+// ToSVG takes a GoLang repo as input and returns an SVG dependency graph
+func ToSVG(cache *cache.Cache, repo string, cluster bool) (string, error) {
 	svg, err := cache.GetSVG(repo, cluster)
 	if err == nil {
 		return svg, nil
 	}
 
-	dot, err := GenDOT(cache, repo, cluster)
+	dot, err := ToDOT(cache, repo, cluster)
 	if err != nil {
 		log.Errorf("error generating dot: %s", err)
 		return "", err
@@ -50,41 +72,23 @@ func GenSVG(cache *cache.Cache, repo string, cluster bool) (string, error) {
 	return svg, nil
 }
 
-func GenDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
+// ToDOT takes a GoLang repo as input and returns a DOT dependency graph
+func ToDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 	dot, err := cache.GetDOT(repo, cluster)
 	if err == nil {
 		return dot, nil
 	}
 
-	rev, err := getRev(cache, repo)
+	codeDir, err := toDir(cache, repo)
 	if err != nil {
-		log.Errorf("failed to get revision: %s", err)
+		log.Errorf("failed to get dir: %s", err)
 		return "", err
 	}
 
-	codeDir, err := cache.GetRepoDir(repo, rev)
-	if err != nil || !exists(codeDir) {
-		zipBody, err := downloadZip(repo, rev)
-		if err != nil {
-			log.Errorf("failed to download zip: %s", err)
-			return "", err
-		}
-
-		tmpDir, err := unzip(zipBody)
-		if err != nil {
-			log.Errorf("failed unzip: %s", err)
-			return "", err
-		}
-
-		codeDir = fmt.Sprintf("%s/%s@%s", tmpDir, repo, rev)
-
-		go cache.SetRepoDir(repo, rev, codeDir)
-	}
-
-	dot, err = runGoda(codeDir, cluster)
+	dot, err = dirToDot(codeDir, cluster)
 	if err != nil {
 		// goda command failed, delete repo dir
-		go cache.DelRepoDir(repo, rev)
+		go cache.DelRepoDir(repo)
 
 		log.Errorf("goda failed: %s", err)
 		return "", err
@@ -95,7 +99,38 @@ func GenDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 	return dot, nil
 }
 
-func getRev(cache *cache.Cache, repo string) (string, error) {
+func toDir(cache *cache.Cache, repo string) (string, error) {
+	codeDir, err := cache.GetRepoDir(repo)
+	if err == nil && exists(codeDir) {
+		return codeDir, nil
+	}
+
+	rev, err := toRev(cache, repo)
+	if err != nil {
+		log.Errorf("failed to get revision: %s", err)
+		return "", err
+	}
+
+	zipBody, err := revToZip(repo, rev)
+	if err != nil {
+		log.Errorf("failed to download zip: %s", err)
+		return "", err
+	}
+
+	tmpDir, err := zipToDir(zipBody)
+	if err != nil {
+		log.Errorf("failed unzip: %s", err)
+		return "", err
+	}
+
+	codeDir = fmt.Sprintf("%s/%s@%s", tmpDir, repo, rev)
+
+	go cache.SetRepoDir(repo, codeDir)
+
+	return codeDir, nil
+}
+
+func toRev(cache *cache.Cache, repo string) (string, error) {
 	version, err := cache.GetRepoVersion(repo)
 	if err == nil {
 		return version, nil
@@ -149,7 +184,7 @@ func getRev(cache *cache.Cache, repo string) (string, error) {
 	return rev.Version, nil
 }
 
-func downloadZip(repo string, rev string) ([]byte, error) {
+func revToZip(repo string, rev string) ([]byte, error) {
 	repoURL := fmt.Sprintf("https://proxy.golang.org/%s/@v/%s.zip", repo, rev)
 	log.Debugf("requesting zip: %s", repoURL)
 
@@ -171,7 +206,7 @@ func downloadZip(repo string, rev string) ([]byte, error) {
 	return zipBody, nil
 }
 
-func unzip(zipBody []byte) (string, error) {
+func zipToDir(zipBody []byte) (string, error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(zipBody), int64(len(zipBody)))
 	if err != nil {
 		log.Errorf("zip.NewReader err: %s", err)
@@ -220,7 +255,7 @@ func unzip(zipBody []byte) (string, error) {
 	return tmpDir, nil
 }
 
-func runGoda(dir string, cluster bool) (string, error) {
+func dirToDot(dir string, cluster bool) (string, error) {
 	args := []string{"graph", "-short"}
 	if cluster {
 		args = append(args, "-cluster")
@@ -241,7 +276,8 @@ func runGoda(dir string, cluster bool) (string, error) {
 		return "", err
 	}
 
-	if len(stderr.Bytes()) != 0 {
+	serr := string(stderr.Bytes())
+	if strings.Contains(serr, "matched no packages") {
 		err := fmt.Errorf("goda cmd returned stderr: %s", string(stderr.Bytes()))
 		log.Error(err)
 		return "", err

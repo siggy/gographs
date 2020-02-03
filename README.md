@@ -18,10 +18,16 @@ redis-server /usr/local/etc/redis.conf
 ### Boot server
 
 ```bash
-go run main.go
+go run main.go --addr localhost:8888 --redis-addr localhost:6379 --log-level debug
 ```
 
 Browse to http://localhost:8888
+
+## Testing
+
+```bash
+golint ./...
+```
 
 ## HTTP Endpoints
 
@@ -54,16 +60,16 @@ Permalink to view an arbitrary SVG URL.
 Go repo SVG direct link.
 
 - Content-Type: `image/svg+xml; charset=utf-8`
-- Example: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg?cluster=false
-- Example: https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
+- Example: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg?cluster=false&refresh=false
+- Example: https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false&refresh=false
 
 ### GET /repo/[GITHUB_REPO].dot?cluster=[false|true]
 
 Go repo GraphViz DOT direct link.
 
 - Content-Type: `text/plain; charset=utf-8`
-- Example:  http://localhost:8888/repo/github.com/linkerd/linkerd2.dot?cluster=false
-- Example:  https://gographs.io/repo/github.com/siggy/gographs.dot?cluster=false
+- Example:  http://localhost:8888/repo/github.com/linkerd/linkerd2.dot?cluster=false&refresh=false
+- Example:  https://gographs.io/repo/github.com/siggy/gographs.dot?cluster=false&refresh=false
 
 ## Credits
 
@@ -77,11 +83,10 @@ deserve calling out:
 
 - prod
   - default to this repo
-  - "refresh now", show cache age
-  - runtime flags
-    - log-level
-    - redis-server
   - remove or repurpose localhost URLs in readme
+  - monitoring, cache hits/misses
+- graphs by repo revision
+- "refresh now" button, show cache age
 - fix new svg loading on firefox
 - prevent normal dragging on mobile
 - refresh button

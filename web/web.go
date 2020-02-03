@@ -1,9 +1,5 @@
 package web
 
-// curl https://proxy.golang.org/github.com/siggy/heypic/@v/master.info
-// curl -O https://proxy.golang.org/github.com/siggy/heypic/@v/v0.0.0-20180506171301-e384f182b391.zip | unzip
-// goda graph github.com/linkerd/linkerd2...:root | dot -Tsvg -o graph2.svg
-
 import (
 	"encoding/json"
 	"net/http"
@@ -16,25 +12,41 @@ import (
 	"github.com/siggy/gographs/repo"
 )
 
-func Start(c *cache.Cache) error {
+// Start initializes the web server and starts listening
+func Start(c *cache.Cache, addr string) error {
 	router := mux.NewRouter().Methods(http.MethodGet).Subrouter()
 
-	repoHandler := mkRepoHandler(c)
-	router.PathPrefix("/repo").Queries("cluster", "{cluster:true|false}").HandlerFunc(repoHandler)
+	log := log.WithFields(
+		log.Fields{
+			"web": addr,
+		},
+	)
+
+	repoHandler := mkRepoHandler(c, log)
 	router.PathPrefix("/repo").HandlerFunc(repoHandler)
 	router.HandleFunc("/top-repos", mkTopReposHandler(c))
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
-	host := "localhost:8888" // TODO: parameterize
-	log.Infof("serving on %s", host)
+	log.Infof("serving on %s", addr)
 
-	return http.ListenAndServe(host, router)
+	return http.ListenAndServe(addr, router)
 }
 
-func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
+func mkRepoHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 
-	// /repo/github.com/siggy/gographs.svg?cluster=true
+	// /repo/github.com/siggy/gographs.svg?cluster=false&refresh=false
 	return func(rw http.ResponseWriter, r *http.Request) {
+		vars := r.URL.Query()
+		cluster := vars.Get("cluster") == "true"
+		refresh := vars.Get("refresh") == "true"
+
+		tpl, err := mux.CurrentRoute(r).GetPathTemplate()
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			rw.Write([]byte(err.Error()))
+			return
+		}
+
 		suffix := ""
 		contentType := ""
 		if strings.HasSuffix(r.URL.Path, ".svg") {
@@ -49,32 +61,25 @@ func mkRepoHandler(cache *cache.Cache) http.HandlerFunc {
 			return
 		}
 
-		route := mux.CurrentRoute(r)
-		tpl, err := route.GetPathTemplate()
+		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
+
+		if refresh {
+			err := cache.Clear(goRepo)
+			if err != nil {
+				log.Errorf("Failed to clear cache for repo %s: %s", goRepo, err)
+			}
+		}
+
+		out := ""
+		if suffix == ".svg" {
+			out, err = repo.ToSVG(cache, goRepo, cluster)
+		} else if suffix == ".dot" {
+			out, err = repo.ToDOT(cache, goRepo, cluster)
+		}
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 			rw.Write([]byte(err.Error()))
 			return
-		}
-		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
-
-		out, err := cache.GetURL(r.URL.String())
-		if err != nil {
-
-			// cache miss
-			cluster := mux.Vars(r)["cluster"] == "true"
-			if suffix == ".svg" {
-				out, err = repo.GenSVG(cache, goRepo, cluster)
-			} else if suffix == ".dot" {
-				out, err = repo.GenDOT(cache, goRepo, cluster)
-			}
-			if err != nil {
-				rw.WriteHeader(http.StatusInternalServerError)
-				rw.Write([]byte(err.Error()))
-				return
-			}
-
-			go cache.SetURL(r.URL.String(), out)
 		}
 
 		go cache.RepoScoreIncr(goRepo)
