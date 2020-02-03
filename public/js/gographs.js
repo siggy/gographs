@@ -149,7 +149,7 @@ DOM.thumbSvg.addEventListener('load', function(){
 DOM.scopeContainer.addEventListener(
   'wheel',
   function wheelZoom(e) {
-    const svg = DOM.mainSvg.contentDocument.querySelector('svg')
+    const svg = DOM.mainSvg.contentDocument.querySelector('svg');
     if (!svg) {
       console.debug('no svg loaded');
       return
@@ -289,10 +289,15 @@ function handleInput() {
     stopSpinner(spinner);
   })
   .catch(error => {
-    error.response.text().then(text => {
-      showError(text);
+    if (error.response !== undefined) {
+      error.response.text().then(text => {
+        showError(text);
+        stopSpinner(spinner);
+      });
+    } else {
+      showError(error);
       stopSpinner(spinner);
-    });
+    }
   });
 }
 

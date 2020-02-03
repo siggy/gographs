@@ -75,16 +75,15 @@ deserve calling out:
 
 ## TODO
 
-- default to this repo
-- "refresh now", show cache age
-- better fonts on svg
-- size control-panel
-- runtime flags
-  - log-level
-  - redis-server
-- firefox support
+- prod
+  - default to this repo
+  - "refresh now", show cache age
+  - runtime flags
+    - log-level
+    - redis-server
+  - remove or repurpose localhost URLs in readme
+- fix new svg loading on firefox
 - prevent normal dragging on mobile
-- remove or repurpose localhost URLs in readme
 - refresh button
 - fix thumbnail resize/refresh jitter
 - fix irc logo thumbnail border aspect ratio
