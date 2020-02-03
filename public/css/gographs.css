@@ -51,10 +51,9 @@ body {
   height: 50px;
   width: 500px;
   padding: 6px;
-  background: rgba(225, 235, 245, 0.5);
+  background: rgba(225, 235, 245, 0.9);
   transition: transform 250ms ease-in-out;
 }
-
 
 /*
  * primary input text
@@ -71,10 +70,11 @@ body {
 }
 
 #input-error {
+  color: white;
   position: absolute;
-  bottom: 6px;
+  top: 72px;
   border-color: #bf4040;
-  background-color: rgb(191, 64, 64, 0.7);
+  background-color: rgb(191, 64, 64, 0.9);
   opacity: 0;
   width: inherit;
   transition: opacity 250ms linear;
@@ -152,6 +152,35 @@ body {
   margin-top: 3px;
 }
 
+#check-cluster-label {
+  position: absolute;
+  left: 3px;
+  bottom: 0;
+}
+
+#check-cluster {
+  vertical-align: top;
+}
+
+.external-links {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+}
+.external-link {
+  display: none;
+}
+.external-link.visible {
+  display: inline;
+}
+
+.autocomplete-suggestion {
+  color: #555;
+}
+.autocomplete-suggestion b {
+  color: #000;
+}
+
 /*
  * spinner
  *
@@ -198,16 +227,4 @@ body {
 
 a {
   text-decoration: none;
-}
-
-.external-link {
-  display: none;
-}
-
-.autocomplete-suggestion {
-  color: #555;
-}
-
-.autocomplete-suggestion b {
-  color: #000;
 }

@@ -75,6 +75,10 @@ deserve calling out:
 
 ## TODO
 
+- on drag mouseup, don't open godoc link
+- default to this repo
+- fix cluster checkbox not working
+- "refresh now", show cache age
 - better fonts on svg
 - size control-panel
 - runtime flags

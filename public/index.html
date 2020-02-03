@@ -27,15 +27,16 @@
 
     <div id="control-panel" class="floating-panel">
       <input type="text" placeholder="github.com/siggy/gographs" id="main-input" class="control-panel-module" aria-label="SVG Input">
-      <div id="check-cluster-input">
-        <input type="checkbox" id="check-cluster">
-        <label for="check-cluster">Cluster</label>
-      </div>
+      <label for="check-cluster" id="check-cluster-label">
+        <input type="checkbox" id="check-cluster"/>Cluster
+      </label>
 
-      <a id="external-svg"   class="external-link" target="_blank">svg  <i class="fa fa-external-link"></i></a>
-      <a id="external-dot"   class="external-link" target="_blank">dot  <i class="fa fa-external-link"></i></a>
-      <a id="external-repo"  class="external-link" target="_blank">repo <i class="fa fa-external-link"></i></a>
-      <a id="external-godoc" class="external-link" target="_blank">godoc<i class="fa fa-external-link"></i></a>
+      <div class="external-links">
+        <a id="external-repo"  class="external-link" target="_blank">repo  <i class="fa fa-external-link"></i></a>
+        <a id="external-godoc" class="external-link" target="_blank">godoc <i class="fa fa-external-link"></i></a>
+        <a id="external-dot"   class="external-link" target="_blank">dot   <i class="fa fa-external-link"></i></a>
+        <a id="external-svg"   class="external-link" target="_blank">svg   <i class="fa fa-external-link"></i></a>
+      </div>
 
       <div id="input-error" class="control-panel-module"></div>
     </div>

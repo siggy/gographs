@@ -5,7 +5,6 @@ const defaultInput = 'github.com/linkerd/linkerd2';
 const DOM = {
   // https://magnushoff.com/blog/dependency-free-javascript/
   checkCluster:      document.getElementById('check-cluster'),
-  checkClusterInput: document.getElementById('check-cluster-input'),
   externalDot:       document.getElementById('external-dot'),
   externalGoDoc:     document.getElementById('external-godoc'),
   externalRepo:      document.getElementById('external-repo'),
@@ -99,7 +98,7 @@ DOM.mainSvg.addEventListener('load', function(){
     preventMouseEventsDefault: false,
     zoomScaleSensitivity: 0.2,
     minZoom: 1,
-    maxZoom: 20,
+    maxZoom: 30,
     fit: true,
     contain: false,
     center: true,
@@ -304,22 +303,20 @@ function loadSvg(svgHref, goRepo, blob) {
   DOM.mainSvg.data = svgUrl;
 
   DOM.externalSvg.href = svgHref;
-  DOM.externalSvg.style.display = 'block';
+  DOM.externalSvg.classList.add("visible");
 
   if (goRepo) {
     DOM.externalDot.href = svgHref.replace('.svg', '.dot');
     DOM.externalRepo.href = "https://"+goRepo;
     DOM.externalGoDoc.href = "https://godoc.org/" + goRepo;
 
-    DOM.externalDot.style.display = 'block';
-    DOM.externalRepo.style.display = 'block';
-    DOM.externalGoDoc.style.display = 'block';
-    DOM.checkClusterInput.style.display = 'block';
+    DOM.externalDot.classList.add("visible");
+    DOM.externalRepo.classList.add("visible");
+    DOM.externalGoDoc.classList.add("visible");
   } else {
-    DOM.externalDot.style.display = 'none';
-    DOM.externalRepo.style.display = 'none';
-    DOM.externalGoDoc.style.display = 'none';
-    DOM.checkClusterInput.style.display = 'none';
+    DOM.externalDot.classList.remove("visible");
+    DOM.externalRepo.classList.remove("visible");
+    DOM.externalGoDoc.classList.remove("visible");
   }
 }
 
