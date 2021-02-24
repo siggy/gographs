@@ -81,6 +81,11 @@ deserve calling out:
 
 ## TODO
 
+- faster, replace Download
+  - golang.org/x/tools/go/vcs or
+  - https://github.com/gojp/goreportcard/blob/master/download/download.go
+- don't shell out
+- landing page
 - prod
   - default to this repo
   - remove or repurpose localhost URLs in readme
