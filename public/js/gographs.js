@@ -59,7 +59,7 @@ function updateInputsFromUrl() {
   } else {
     // unrecognized URL, reset everything to default
     DOM.mainInput.value = defaultInput;
-    DOM.checkCluster.checked = false;
+    DOM.checkCluster.checked = true;
   }
 
   return;

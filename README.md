@@ -66,11 +66,9 @@ deserve calling out:
 
 ## TODO
 
+- warning on spinner requests can take up to 1 minute
+- handle form input that includes the `http[s]://`
 - show "Last refresh" time
-- new URL scheme gographs.io/repo/github.com/siggy/gographs?cluster=true
-  - already a thing: http://localhost:8888/repo/github.com/siggy/gographs.svg?cluster=true
-- change godoc to pkg.dev
-- make Clear() work
 - make fonts bigger / easier to read
 - fix double click to zoom changing center / viewport limits
 - fix thumbnail click to move not tracking the click point exactly
