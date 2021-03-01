@@ -1,6 +1,7 @@
 body {
   font-family: Roboto, Arial, sans-serif;
   color: #555;
+  margin: 0;
 }
 
 .floating-panel {
@@ -34,6 +35,7 @@ body {
   bottom: 0;
   height: 25%;
   width: auto;
+  max-width: 25%;
 }
 
 #scope-container {

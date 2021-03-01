@@ -4,12 +4,13 @@ import (
 	"flag"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/siggy/gographs/cache"
 	"github.com/siggy/gographs/web"
+	log "github.com/sirupsen/logrus"
 )
+
+var repo = "github.com/linkerd/linkerd2"
 
 func main() {
 	addr := flag.String("addr", "localhost:8888", "address to listen on")

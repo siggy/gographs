@@ -22,19 +22,31 @@ func Start(c *cache.Cache, addr string) error {
 		},
 	)
 
-	repoHandler := mkRepoHandler(c, log)
+	// web views
 	router.PathPrefix("/repo").HandlerFunc(repoHandler)
+	router.HandleFunc("/svg", repoHandler)
+	router.HandleFunc("/", repoHandler)
+
+	// apis
+	graphHandler := mkGraphHandler(c, log)
+	router.PathPrefix("/graph").HandlerFunc(graphHandler)
 	router.HandleFunc("/top-repos", mkTopReposHandler(c))
+
+	// assets
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
-	log.Infof("Web server listening")
+	log.Infof("Web server listening on %s", addr)
 
 	return http.ListenAndServe(addr, router)
 }
 
-func mkRepoHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
+func repoHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "public/index.html")
+}
 
-	// /repo/github.com/siggy/gographs.svg?cluster=false&refresh=false
+func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
+
+	// /graph/github.com/siggy/gographs.svg?cluster=false&refresh=false
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vars := r.URL.Query()
 		cluster := vars.Get("cluster") == "true"
@@ -64,11 +76,14 @@ func mkRepoHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
 
 		if refresh {
+			log.Debugf("Clearing cache for %s", goRepo)
 			err := cache.Clear(goRepo)
 			if err != nil {
 				log.Errorf("Failed to clear cache for repo %s: %s", goRepo, err)
 			}
 		}
+
+		log.Debugf("Processing %s", goRepo)
 
 		out := ""
 		if suffix == ".svg" {

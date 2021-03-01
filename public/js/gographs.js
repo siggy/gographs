@@ -1,5 +1,6 @@
 'use strict';
 
+// TODO: needed?
 const defaultInput = 'github.com/linkerd/linkerd2';
 
 const DOM = {
@@ -16,6 +17,7 @@ const DOM = {
   scopeContainer:    document.getElementById('scope-container'),
   spinner:           document.getElementById('spinner'),
   thumbSvg:          document.getElementById('thumb-svg'),
+  viewport:          null, // fill in on load with "".svg-pan-zoom_viewport"
 };
 
 /*
@@ -45,18 +47,21 @@ window.onpopstate = function(event) {
 
 function updateInputsFromUrl() {
   const searchParams = new URLSearchParams(window.location.search);
-  if (searchParams.has('repo')) {
-    // /?repo=github.com/siggy/gographs&cluster=false
-    DOM.mainInput.value = searchParams.get('repo');
+
+  if (window.location.pathname.startsWith("/repo/")) {
+    // /repo/github.com/siggy/gographs?cluster=false
+    DOM.mainInput.value = window.location.pathname.slice("/repo/".length)
     DOM.checkCluster.checked = searchParams.get('cluster') === 'true';
-  } else if (searchParams.has('url')) {
-    // /?url=https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
+  } else if (window.location.pathname.startsWith("/svg")) {
+    // /svg?url=https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false
     DOM.mainInput.value = searchParams.get('url');
   } else {
     // unrecognized URL, reset everything to default
     DOM.mainInput.value = defaultInput;
     DOM.checkCluster.checked = false;
   }
+
+  return;
 }
 
 /*
@@ -91,14 +96,14 @@ DOM.mainSvg.addEventListener('load', function(){
   const mainSvgPanZoom = svgPanZoom(svg, {
     viewportSelector: '#main-svg',
     panEnabled: true,
-    controlIconsEnabled: false,
+    controlIconsEnabled: true,
     zoomEnabled: true,
     dblClickZoomEnabled: true,
     mouseWheelZoomEnabled: true,
     preventMouseEventsDefault: false,
     zoomScaleSensitivity: 0.2,
     minZoom: 1,
-    maxZoom: 30,
+    maxZoom: 100,
     fit: true,
     contain: false,
     center: true,
@@ -113,6 +118,9 @@ DOM.mainSvg.addEventListener('load', function(){
   });
 
   bindThumbnail(mainSvgPanZoom, undefined);
+
+  DOM.viewport = DOM.mainSvg.contentWindow.document.
+    getElementsByClassName("svg-pan-zoom_viewport")[0];
 })
 
 DOM.thumbSvg.addEventListener('load', function(){
@@ -222,15 +230,13 @@ function between(val, a, b) {
 }
 
 function beforePan(_, newPan){
-  let sizes = this.getSizes();
-
-  const realWidth = sizes.viewBox.width * sizes.realZoom;
-  const realHeight = sizes.viewBox.height * sizes.realZoom;
+  const sizes = this.getSizes();
+  const viewportRect = DOM.viewport.getBoundingClientRect();
 
   return {
-    x: between(newPan.x, 0, sizes.width - realWidth),
-    y: between(newPan.y, 0, sizes.height - realHeight),
-  };
+    x: between(newPan.x, 0, sizes.width - viewportRect.width),
+    y: between(newPan.y, 0, sizes.height - viewportRect.height),
+  }
 }
 
 function checkStatus(response) {
@@ -254,8 +260,11 @@ function handleInput() {
     null;
 
   let url;
-  if (goRepo) {
-    url = new URL('/repo/' + input + '.svg?cluster=' + cluster, window.location.origin);
+  if (goRepo !== null) {
+    url = new URL('/graph/' + goRepo + '.svg', window.location.origin);
+    if (cluster === true) {
+      url.searchParams.append("cluster", "true");
+    }
   } else {
     url = new URL(input);
     if (!url.pathname.endsWith('.svg')) {
@@ -272,10 +281,13 @@ function handleInput() {
   .then(checkStatus)
   .then(resp => resp.blob())
   .then(blob => {
-    let urlState = goRepo ? '/?repo='+input+'&cluster='+cluster : '/?url='+url;
-    if (input === defaultInput && !cluster) {
-      // special root URL for default inputs
-      urlState = '/';
+    const u = goRepo ?
+      '/repo/'+input :
+      '/svg?url='+url;
+
+    const urlState = new URL(u, window.location.origin);
+    if (cluster === true) {
+      urlState.searchParams.append("cluster", "true");
     }
 
     history.pushState(
@@ -313,7 +325,7 @@ function loadSvg(svgHref, goRepo, blob) {
   if (goRepo) {
     DOM.externalDot.href = svgHref.replace('.svg', '.dot');
     DOM.externalRepo.href = "https://"+goRepo;
-    DOM.externalGoDoc.href = "https://godoc.org/" + goRepo;
+    DOM.externalGoDoc.href = "https://pkg.go.dev/" + goRepo;
 
     DOM.externalDot.classList.add("visible");
     DOM.externalRepo.classList.add("visible");

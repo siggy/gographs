@@ -1,15 +1,52 @@
 # GoGraphs
 
-[GoGraphs](https://gographs.io) renders dependency graphs for Go packages:
+[GoGraphs](https://gographs.io) renders dependency graphs for Go packages.
 
-![GoGraphs dependency example](https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false "GoGraphs Dependencies")
+![GoGraphs dependency example](https://gographs.io/repo/github.com/siggy/gographs.svg "GoGraphs Dependencies")
+
+## HTTP Endpoints
+
+### GET /
+
+Defaults to rendering this Go package.
+
+- Example: https://gographs.io
+- Content-Type: `text/html; charset=utf-8`
+
+### GET /repo/[GO_REPO]?cluster=[false|true]
+
+Permalink to view a Go repo SVG.
+
+- Example: https://gographs.io/repo/github.com/siggy/gographs
+- Content-Type: `text/html; charset=utf-8`
+
+### GET /graph/[GITHUB_REPO].svg?cluster=[false|true]
+
+Go repo SVG direct link.
+
+- Example: https://gographs.io/graph/github.com/siggy/gographs.svg
+- Content-Type: `image/svg+xml; charset=utf-8`
+
+### GET /graph/[GITHUB_REPO].dot?cluster=[false|true]
+
+Go repo GraphViz DOT direct link.
+
+- Example:  https://gographs.io/graph/github.com/siggy/gographs.dot
+- Content-Type: `text/plain; charset=utf-8`
+
+### GET /svg?url=[SVG_URL]
+
+Permalink to view an arbitrary SVG URL.
+
+- Example: https://gographs.io/svg?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
+- Content-Type: `text/html; charset=utf-8`
 
 ## Local dev
 
 ### First-time setup
 
 ```bash
-go get github.com/loov/goda
+go install github.com/loov/goda@v0.2.1
 brew install dot # or equivalent
 brew install redis # or equivalent
 redis-server /usr/local/etc/redis.conf
@@ -29,48 +66,6 @@ Browse to http://localhost:8888
 golint ./...
 ```
 
-## HTTP Endpoints
-
-### GET /
-
-Defaults to rendering this Go package.
-
-- Content-Type: `text/html; charset=utf-8`
-- Example: http://localhost:8888
-- Example: https://gographs.io
-
-### GET /?repo=[GO_REPO]?cluster=[false|true]
-
-Permalink to view a Go repo SVG.
-
-- Content-Type: `text/html; charset=utf-8`
-- Example: http://localhost:8888/?repo=github.com/linkerd/linkerd2?cluster=false
-- Example: https://gographs.io/?repo=github.com/siggy/gographs?cluster=false
-
-### GET /?url=[SVG_URL]
-
-Permalink to view an arbitrary SVG URL.
-
-- Content-Type: `text/html; charset=utf-8`
-- Example: http://localhost:8888/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
-- Example: https://gographs.io/?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
-
-### GET /repo/[GITHUB_REPO].svg?cluster=[false|true]
-
-Go repo SVG direct link.
-
-- Content-Type: `image/svg+xml; charset=utf-8`
-- Example: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg?cluster=false&refresh=false
-- Example: https://gographs.io/repo/github.com/siggy/gographs.svg?cluster=false&refresh=false
-
-### GET /repo/[GITHUB_REPO].dot?cluster=[false|true]
-
-Go repo GraphViz DOT direct link.
-
-- Content-Type: `text/plain; charset=utf-8`
-- Example:  http://localhost:8888/repo/github.com/linkerd/linkerd2.dot?cluster=false&refresh=false
-- Example:  https://gographs.io/repo/github.com/siggy/gographs.dot?cluster=false&refresh=false
-
 ## Credits
 
 This tool is built using many open source packages, but two in particular
@@ -81,9 +76,22 @@ deserve calling out:
 
 ## TODO
 
+- refresh should be POST-only
+- new URL scheme gographs.io/repo/github.com/siggy/gographs?cluster=true&refresh=true
+  - already a thing: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg?cluster=true
+- change godoc to pkg.dev
+- make Clear() work
+- make fonts bigger / easier to read
+- fix double click to zoom changing center / viewport limits
+- fix thumbnail click to move not tracking the click point exactly
+- fix http://localhost:8888/?repo=github.com/kubernetes/kubernetes&cluster=true
+- deterministic repo location, with cli flag
+- use bin/goda
+- don't default to master.info
 - faster, replace Download
   - golang.org/x/tools/go/vcs or
   - https://github.com/gojp/goreportcard/blob/master/download/download.go
+  - OR: use existing proxy, then fall back to vcs/download.go
 - don't shell out
 - landing page
 - prod

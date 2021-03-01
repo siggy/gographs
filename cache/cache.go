@@ -16,12 +16,6 @@ type Cache struct {
 }
 
 const (
-	// repo-version[repo]
-	// github.com/siggy/gographs
-	// =>
-	// v1.8.2-0.20200110142541-64194f7d45cb
-	repoVersionHash = "repoversion"
-
 	// repo-dir[repo]
 	// github.com/siggy/gographs
 	// =>
@@ -77,12 +71,7 @@ func New(addr string) (*Cache, error) {
 // Clear deletes all cache entries relevant to a GoLang repo.
 func (c *Cache) Clear(repo string) error {
 	var rerr error
-	_, err := c.hdel(repoVersionHash, repo)
-	if err != nil && rerr == nil {
-		rerr = err
-	}
-
-	_, err = c.hdel(repoDirHash, repo)
+	_, err := c.hdel(repoDirHash, repo)
 	if err != nil && rerr == nil {
 		rerr = err
 	}
@@ -135,18 +124,6 @@ func (c *Cache) SetDOT(repo string, cluster bool, dot string) {
 // GetDOT gets a DOT for a repo.
 func (c *Cache) GetDOT(repo string, cluster bool) (string, error) {
 	return c.hget(dotHash, repoKey(repo, cluster))
-}
-
-// SetRepoVersion sets a revision for a repo.
-func (c *Cache) SetRepoVersion(repo string, version string) {
-	if err := c.hset(repoVersionHash, repo, version); err != nil {
-		c.log.Errorf("SetRepoVersion failed: %s", err)
-	}
-}
-
-// GetRepoVersion gets a revision for a repo.
-func (c *Cache) GetRepoVersion(repo string) (string, error) {
-	return c.hget(repoVersionHash, repo)
 }
 
 // SetRepoDir sets a directory for a repo.
@@ -202,7 +179,6 @@ func (c *Cache) hdel(key, field string) (int64, error) {
 }
 
 func registerGauges(client *redis.Client) {
-	registerHashGauge(client, repoVersionHash)
 	registerHashGauge(client, repoDirHash)
 	registerHashGauge(client, dotHash)
 	registerHashGauge(client, svgHash)
