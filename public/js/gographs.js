@@ -238,7 +238,12 @@ function between(val, a, b) {
   }
 }
 
-function beforePan(_, newPan){
+function beforePan(oldPan, newPan){
+  if (oldPan.x == newPan.x && oldPan.y == newPan.y) {
+    // zoom, not a pan
+    return newPan;
+  }
+
   const sizes = this.getSizes();
   const viewportRect = DOM.viewport.getBoundingClientRect();
 

@@ -69,21 +69,12 @@ deserve calling out:
 - warning on spinner requests can take up to 1 minute
 - show "Last refresh" time
 - make fonts bigger / easier to read
-- fix double click to zoom changing center / viewport limits
 - fix thumbnail click to move not tracking the click point exactly
 - fix http://localhost:8888/?repo=github.com/kubernetes/kubernetes&cluster=true
-- deterministic repo location, with cli flag
-- use bin/goda
-- don't default to master.info
-- faster, replace Download
-  - golang.org/x/tools/go/vcs or
-  - https://github.com/gojp/goreportcard/blob/master/download/download.go
-  - OR: use existing proxy, then fall back to vcs/download.go
+- deterministic repo location, with cli flag?
 - don't shell out
 - landing page
 - prod
-  - default to this repo
-  - remove or repurpose localhost URLs in readme
   - monitoring, cache hits/misses
 - graphs by repo revision
 - fix new svg loading on firefox
@@ -91,6 +82,5 @@ deserve calling out:
 - fix thumbnail resize/refresh jitter
 - fix irc logo thumbnail border aspect ratio
 - show progress during repo compile
-- generic svg and dot support, paste and url
 - consider capturing all mouse scrolling over every element
 - on drag mouseup, don't open godoc link
