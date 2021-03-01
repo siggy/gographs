@@ -1,7 +1,7 @@
 'use strict';
 
 // TODO: needed?
-const defaultInput = 'github.com/linkerd/linkerd2';
+const defaultInput = 'github.com/siggy/gographs';
 
 const DOM = {
   // https://magnushoff.com/blog/dependency-free-javascript/

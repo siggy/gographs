@@ -6,27 +6,27 @@
 
 ## HTTP Endpoints
 
-### [https://gographs.io](https://gographs.io)
+### [gographs.io](https://gographs.io)
 Defaults to rendering this Go repo.
 
 `text/html; charset=utf-8`
 
-### [https://gographs.io/repo/GO_REPO?cluster=false|true](https://gographs.io/repo/github.com/siggy/gographs)
+### [gographs.io/repo/GO_REPO?cluster=false|true](https://gographs.io/repo/github.com/siggy/gographs)
 Permalink to view a Go repo SVG.
 
 `text/html; charset=utf-8`
 
-### [https://gographs.io/graph/GO_REPO.svg?cluster=false|true](https://gographs.io/graph/github.com/siggy/gographs.svg)
+### [gographs.io/graph/GO_REPO.svg?cluster=false|true](https://gographs.io/graph/github.com/siggy/gographs.svg)
 Go repo SVG direct link.
 
 `image/svg+xml; charset=utf-8`
 
-### [https://gographs.io/graph/GO_REPO.dot?cluster=false|true](https://gographs.io/graph/github.com/siggy/gographs.dot)
+### [gographs.io/graph/GO_REPO.dot?cluster=false|true](https://gographs.io/graph/github.com/siggy/gographs.dot)
 Go repo GraphViz DOT direct link.
 
 `text/plain; charset=utf-8`
 
-### [https://gographs.io/svg?url=SVG_URL](https://gographs.io/svg?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg)
+### [gographs.io/svg?url=SVG_URL](https://gographs.io/svg?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg)
 Permalink to view an arbitrary SVG URL.
 
 `text/html; charset=utf-8`
@@ -68,7 +68,7 @@ deserve calling out:
 
 - refresh should be POST-only
 - new URL scheme gographs.io/repo/github.com/siggy/gographs?cluster=true&refresh=true
-  - already a thing: http://localhost:8888/repo/github.com/linkerd/linkerd2.svg?cluster=true
+  - already a thing: http://localhost:8888/repo/github.com/siggy/gographs.svg?cluster=true
 - change godoc to pkg.dev
 - make Clear() work
 - make fonts bigger / easier to read

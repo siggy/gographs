@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var repo = "github.com/linkerd/linkerd2"
+var repo = "github.com/siggy/gographs"
 
 func main() {
 	addr := flag.String("addr", "localhost:8888", "address to listen on")
