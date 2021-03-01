@@ -155,9 +155,13 @@ body {
 }
 
 #check-cluster-label {
+  display: none;
   position: absolute;
   left: 3px;
   bottom: 0;
+}
+#check-cluster-label.visible {
+  display: inline;
 }
 
 #check-cluster {
@@ -178,9 +182,13 @@ body {
 }
 
 #refresh {
+  display: none;
   position: absolute;
   right: 2px;
   bottom: 0;
+}
+#refresh.visible {
+  display: inline;
 }
 
 .autocomplete-suggestion {

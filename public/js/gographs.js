@@ -264,21 +264,22 @@ function handleInput(refresh) {
     defaultInput;
   const cluster = DOM.checkCluster.checked;
 
-  const goRepo = !(input.startsWith('http://') || input.startsWith('https://')) ?
-    input :
-    null;
-
   let url;
-  if (goRepo !== null) {
+  let goRepo;
+  if (input.endsWith('.svg')) {
+    url = new URL(input);
+  } else {
+    goRepo = input;
+    if (input.startsWith('https://')) {
+      goRepo = input.slice('https://'.length);
+    } else if (input.startsWith('http://')) {
+      goRepo = input.slice('http://'.length);
+    }
+    DOM.mainInput.value = goRepo;
+
     url = new URL('/graph/' + goRepo + '.svg', window.location.origin);
     if (cluster === true) {
       url.searchParams.append("cluster", "true");
-    }
-  } else {
-    url = new URL(input);
-    if (!url.pathname.endsWith('.svg')) {
-      showError('Input URL not an SVG: ' + input);
-      return
     }
   }
 
@@ -291,7 +292,7 @@ function handleInput(refresh) {
     .then(resp => resp.blob())
     .then(blob => {
       const u = goRepo ?
-        '/repo/'+input :
+        '/repo/'+goRepo :
         '/svg?url='+url;
 
       const urlState = new URL(u, window.location.origin);
@@ -336,13 +337,17 @@ function loadSvg(svgHref, goRepo, blob) {
     DOM.externalRepo.href = "https://"+goRepo;
     DOM.externalGoDoc.href = "https://pkg.go.dev/" + goRepo;
 
+    DOM.checkCluster.parentElement.classList.add("visible");
     DOM.externalDot.classList.add("visible");
     DOM.externalRepo.classList.add("visible");
     DOM.externalGoDoc.classList.add("visible");
+    DOM.refreshButton.classList.add("visible");
   } else {
+    DOM.checkCluster.parentElement.remove("visible");
     DOM.externalDot.classList.remove("visible");
     DOM.externalRepo.classList.remove("visible");
     DOM.externalGoDoc.classList.remove("visible");
+    DOM.refreshButton.classList.remove("visible");
   }
 }
 

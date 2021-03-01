@@ -67,7 +67,6 @@ deserve calling out:
 ## TODO
 
 - warning on spinner requests can take up to 1 minute
-- handle form input that includes the `http[s]://`
 - show "Last refresh" time
 - make fonts bigger / easier to read
 - fix double click to zoom changing center / viewport limits
