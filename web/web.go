@@ -14,7 +14,9 @@ import (
 
 // Start initializes the web server and starts listening
 func Start(c *cache.Cache, addr string) error {
-	router := mux.NewRouter().Methods(http.MethodGet).Subrouter()
+	router := mux.NewRouter()
+	getRouter := router.Methods(http.MethodGet).Subrouter()
+	postRouter := router.Methods(http.MethodPost).Subrouter()
 
 	log := log.WithFields(
 		log.Fields{
@@ -23,17 +25,18 @@ func Start(c *cache.Cache, addr string) error {
 	)
 
 	// web views
-	router.PathPrefix("/repo").HandlerFunc(repoHandler)
-	router.HandleFunc("/svg", repoHandler)
-	router.HandleFunc("/", repoHandler)
+	getRouter.PathPrefix("/repo").HandlerFunc(repoHandler)
+	getRouter.HandleFunc("/svg", repoHandler)
+	getRouter.HandleFunc("/", repoHandler)
 
 	// apis
 	graphHandler := mkGraphHandler(c, log)
-	router.PathPrefix("/graph").HandlerFunc(graphHandler)
-	router.HandleFunc("/top-repos", mkTopReposHandler(c))
+	getRouter.PathPrefix("/graph").HandlerFunc(graphHandler)
+	postRouter.PathPrefix("/graph").HandlerFunc(graphHandler)
+	getRouter.HandleFunc("/top-repos", mkTopReposHandler(c))
 
 	// assets
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
+	getRouter.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
 	log.Infof("Web server listening on %s", addr)
 
@@ -46,11 +49,13 @@ func repoHandler(w http.ResponseWriter, r *http.Request) {
 
 func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 
-	// /graph/github.com/siggy/gographs.svg?cluster=false&refresh=false
+	// GET  /graph/github.com/siggy/gographs.svg
+	// POST /graph/github.com/siggy/gographs.svg (for refresh)
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vars := r.URL.Query()
 		cluster := vars.Get("cluster") == "true"
-		refresh := vars.Get("refresh") == "true"
+
+		refresh := r.Method == http.MethodPost
 
 		tpl, err := mux.CurrentRoute(r).GetPathTemplate()
 		if err != nil {

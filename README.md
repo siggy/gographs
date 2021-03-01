@@ -66,8 +66,8 @@ deserve calling out:
 
 ## TODO
 
-- refresh should be POST-only
-- new URL scheme gographs.io/repo/github.com/siggy/gographs?cluster=true&refresh=true
+- show "Last refresh" time
+- new URL scheme gographs.io/repo/github.com/siggy/gographs?cluster=true
   - already a thing: http://localhost:8888/repo/github.com/siggy/gographs.svg?cluster=true
 - change godoc to pkg.dev
 - make Clear() work
@@ -89,10 +89,8 @@ deserve calling out:
   - remove or repurpose localhost URLs in readme
   - monitoring, cache hits/misses
 - graphs by repo revision
-- "refresh now" button, show cache age
 - fix new svg loading on firefox
 - prevent normal dragging on mobile
-- refresh button
 - fix thumbnail resize/refresh jitter
 - fix irc logo thumbnail border aspect ratio
 - show progress during repo compile

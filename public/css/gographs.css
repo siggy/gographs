@@ -166,14 +166,21 @@ body {
 
 .external-links {
   position: absolute;
-  right: 2px;
+  right: 50px;
   bottom: 0;
 }
 .external-link {
   display: none;
+  margin-right: 10px;
 }
 .external-link.visible {
   display: inline;
+}
+
+#refresh {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
 }
 
 .autocomplete-suggestion {

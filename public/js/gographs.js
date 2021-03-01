@@ -13,6 +13,7 @@ const DOM = {
   inputError:        document.getElementById('input-error'),
   mainInput:         document.getElementById('main-input'),
   mainSvg:           document.getElementById('main-svg'),
+  refreshButton:     document.getElementById('refresh'),
   scope:             document.getElementById('scope'),
   scopeContainer:    document.getElementById('scope-container'),
   spinner:           document.getElementById('spinner'),
@@ -26,11 +27,11 @@ const DOM = {
 
 window.addEventListener('load', (_) => {
   DOM.checkCluster.addEventListener('change', function(_) {
-    handleInput();
+    handleInput(false);
   });
 
   updateInputsFromUrl();
-  handleInput();
+  handleInput(false);
 
   initAutoComplete();
 });
@@ -41,7 +42,7 @@ window.onpopstate = function(event) {
   if (DOM.mainInput.value !== '' && event.state && event.state.blob) {
     loadSvg(event.state.svgHref, event.state.goRepo, event.state.blob);
   } else {
-    handleInput();
+    handleInput(false);
   }
 }
 
@@ -73,7 +74,7 @@ DOM.mainInput.addEventListener('keyup', function(event) {
     return
   }
 
-  handleInput();
+  handleInput(false);
 });
 
 DOM.mainSvg.addEventListener('load', function(){
@@ -179,6 +180,14 @@ DOM.scopeContainer.addEventListener(
   { passive: false }
 );
 
+DOM.refreshButton.addEventListener(
+  'click',
+  function() {
+    handleInput(true);
+    return false;
+  }
+);
+
 /*
  * Misc functions for updating state
  */
@@ -249,7 +258,7 @@ function checkStatus(response) {
   }
 }
 
-function handleInput() {
+function handleInput(refresh) {
   const input = (DOM.mainInput.value !== "") ?
     DOM.mainInput.value :
     defaultInput;
@@ -277,40 +286,40 @@ function handleInput() {
 
   const spinner = startSpinner();
 
-  fetch(url)
-  .then(checkStatus)
-  .then(resp => resp.blob())
-  .then(blob => {
-    const u = goRepo ?
-      '/repo/'+input :
-      '/svg?url='+url;
+  fetch(url, {method: refresh ? 'POST' : 'GET'})
+    .then(checkStatus)
+    .then(resp => resp.blob())
+    .then(blob => {
+      const u = goRepo ?
+        '/repo/'+input :
+        '/svg?url='+url;
 
-    const urlState = new URL(u, window.location.origin);
-    if (cluster === true) {
-      urlState.searchParams.append("cluster", "true");
-    }
+      const urlState = new URL(u, window.location.origin);
+      if (cluster === true) {
+        urlState.searchParams.append("cluster", "true");
+      }
 
-    history.pushState(
-      { svgHref: url.href, goRepo: goRepo, blob: blob },
-      input,
-      urlState,
-    );
+      history.pushState(
+        { svgHref: url.href, goRepo: goRepo, blob: blob },
+        input,
+        urlState,
+      );
 
-    loadSvg(url.href, goRepo, blob);
+      loadSvg(url.href, goRepo, blob);
 
-    stopSpinner(spinner);
-  })
-  .catch(error => {
-    if (error.response !== undefined) {
-      error.response.text().then(text => {
-        showError(text);
-        stopSpinner(spinner);
-      });
-    } else {
-      showError(error);
       stopSpinner(spinner);
-    }
-  });
+    })
+    .catch(error => {
+      if (error.response !== undefined) {
+        error.response.text().then(text => {
+          showError(text);
+          stopSpinner(spinner);
+        });
+      } else {
+        showError(error);
+        stopSpinner(spinner);
+      }
+    });
 }
 
 function loadSvg(svgHref, goRepo, blob) {
@@ -463,7 +472,7 @@ function initAutoComplete() {
           // the input element also handles keyboard enter, skip this one.
           return
         }
-        handleInput();
+        handleInput(false);
         e.preventDefault();
       },
     });
