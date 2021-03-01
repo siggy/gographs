@@ -6,40 +6,30 @@
 
 ## HTTP Endpoints
 
-### GET /
+### [https://gographs.io](https://gographs.io)
+Defaults to rendering this Go repo.
 
-Defaults to rendering this Go package.
+`text/html; charset=utf-8`
 
-- Example: https://gographs.io
-- Content-Type: `text/html; charset=utf-8`
-
-### GET /repo/[GO_REPO]?cluster=[false|true]
-
+### [https://gographs.io/repo/GO_REPO?cluster=false|true](https://gographs.io/repo/github.com/siggy/gographs)
 Permalink to view a Go repo SVG.
 
-- Example: https://gographs.io/repo/github.com/siggy/gographs
-- Content-Type: `text/html; charset=utf-8`
+`text/html; charset=utf-8`
 
-### GET /graph/[GITHUB_REPO].svg?cluster=[false|true]
-
+### [https://gographs.io/graph/GO_REPO.svg?cluster=false|true](https://gographs.io/graph/github.com/siggy/gographs.svg)
 Go repo SVG direct link.
 
-- Example: https://gographs.io/graph/github.com/siggy/gographs.svg
-- Content-Type: `image/svg+xml; charset=utf-8`
+`image/svg+xml; charset=utf-8`
 
-### GET /graph/[GITHUB_REPO].dot?cluster=[false|true]
-
+### [https://gographs.io/graph/GO_REPO.dot?cluster=false|true](https://gographs.io/graph/github.com/siggy/gographs.dot)
 Go repo GraphViz DOT direct link.
 
-- Example:  https://gographs.io/graph/github.com/siggy/gographs.dot
-- Content-Type: `text/plain; charset=utf-8`
+`text/plain; charset=utf-8`
 
-### GET /svg?url=[SVG_URL]
-
+### [https://gographs.io/svg?url=SVG_URL](https://gographs.io/svg?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg)
 Permalink to view an arbitrary SVG URL.
 
-- Example: https://gographs.io/svg?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg
-- Content-Type: `text/html; charset=utf-8`
+`text/html; charset=utf-8`
 
 ## Local dev
 
