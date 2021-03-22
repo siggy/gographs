@@ -208,9 +208,9 @@ func registerSetGauge(client *redis.Client, key string) {
 func registerGauge(function func() float64, key string) {
 	promauto.NewGaugeFunc(
 		prometheus.GaugeOpts{
-			Namespace: "cache",
-			Subsystem: "size",
-			Name:      key,
+			Namespace: "gographs",
+			Subsystem: "cache",
+			Name:      "size_" + key,
 			Help: fmt.Sprintf(
 				"Size of the %s cache",
 				key,

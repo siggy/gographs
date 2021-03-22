@@ -119,7 +119,7 @@ func toDir(cache *cache.Cache, repo string) (string, error) {
 		return "", err
 	}
 
-	root.VCS.CreateCmd = "clone --depth 1 {repo} {dir}"
+	root.VCS.CreateCmd = "clone --depth 1 --no-tags {repo} {dir}"
 	err = root.VCS.Create(codeDir, root.Repo)
 	if err != nil {
 		log.Errorf("cmd.Create err: %s", err)
