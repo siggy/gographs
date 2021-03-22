@@ -1,7 +1,8 @@
 'use strict';
 
 // TODO: needed?
-const defaultInput = 'github.com/siggy/gographs';
+const defaultRepo = 'github.com/siggy/gographs';
+const defaultCluster = true;
 
 const DOM = {
   // https://magnushoff.com/blog/dependency-free-javascript/
@@ -62,8 +63,8 @@ function updateInputsFromUrl() {
     DOM.mainInput.value = searchParams.get('url');
   } else {
     // unrecognized URL, reset everything to default
-    DOM.mainInput.value = defaultInput;
-    DOM.checkCluster.checked = true;
+    DOM.mainInput.value = defaultRepo;
+    DOM.checkCluster.checked = defaultCluster;
   }
 
   return;
@@ -289,7 +290,7 @@ function checkStatus(response) {
 function handleInput(refresh) {
   const input = (DOM.mainInput.value !== "") ?
     DOM.mainInput.value.trim() :
-    defaultInput;
+    defaultRepo;
   const cluster = DOM.checkCluster.checked;
 
   DOM.badgeMarkdown.classList.remove("visible");
@@ -331,12 +332,17 @@ function handleInput(refresh) {
     .then(checkStatus)
     .then(resp => resp.blob())
     .then(blob => {
-      const u = goRepo ?
+      const defaultInput = (goRepo === defaultRepo && cluster === defaultCluster);
+
+      let path = '';
+      if (!defaultInput) {
+        path = goRepo ?
         '/repo/'+goRepo :
         '/svg?url='+url;
+      }
 
-      const urlState = new URL(u, window.location.origin);
-      if (cluster === true) {
+      const urlState = new URL(path, window.location.origin);
+      if (!defaultInput && cluster) {
         urlState.searchParams.append("cluster", "true");
       }
 

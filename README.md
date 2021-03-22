@@ -91,7 +91,6 @@ The [`pkg/repo`](./pkg/repo) is based on:
 
 ## TODO
 
-- default to root gographs.io without params
 - warning on spinner requests can take up to 1 minute
 - show "Last refresh" time
 - make fonts bigger / easier to read
