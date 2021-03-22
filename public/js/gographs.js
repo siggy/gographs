@@ -13,12 +13,16 @@ const DOM = {
   inputError:        document.getElementById('input-error'),
   mainInput:         document.getElementById('main-input'),
   mainSvg:           document.getElementById('main-svg'),
+  badge:             document.getElementById('badge'),
+  badgeMarkdown:     document.getElementById('badge-markdown'),
+  badgeText:         document.getElementById('badge-text'),
   refreshButton:     document.getElementById('refresh'),
   scope:             document.getElementById('scope'),
   scopeContainer:    document.getElementById('scope-container'),
   spinner:           document.getElementById('spinner'),
   thumbSvg:          document.getElementById('thumb-svg'),
   viewport:          null, // fill in on load with "".svg-pan-zoom_viewport"
+  autocomplete:      null, // fill in on handleInput
 };
 
 /*
@@ -188,6 +192,25 @@ DOM.refreshButton.addEventListener(
   }
 );
 
+DOM.badge.addEventListener(
+  'click',
+  function() {
+    DOM.badgeMarkdown.classList.toggle("visible");
+    DOM.badgeText.focus();
+    DOM.badgeText.select();
+    return false;
+  }
+);
+
+DOM.badgeMarkdown.addEventListener(
+  'click',
+  function() {
+    DOM.badgeText.focus();
+    DOM.badgeText.select();
+    return false;
+  }
+);
+
 /*
  * Misc functions for updating state
  */
@@ -265,9 +288,21 @@ function checkStatus(response) {
 
 function handleInput(refresh) {
   const input = (DOM.mainInput.value !== "") ?
-    DOM.mainInput.value :
+    DOM.mainInput.value.trim() :
     defaultInput;
   const cluster = DOM.checkCluster.checked;
+
+  DOM.badgeMarkdown.classList.remove("visible");
+
+  if (DOM.autocomplete === null) {
+    const ac = document.getElementsByClassName("autocomplete-suggestions");
+    if (ac.length > 0) {
+      DOM.autocomplete = ac[0];
+    }
+  }
+  if (DOM.autocomplete !== null) {
+    DOM.autocomplete.style.display = "none";
+  }
 
   let url;
   let goRepo;
@@ -339,7 +374,7 @@ function loadSvg(svgHref, goRepo, blob) {
 
   if (goRepo) {
     DOM.externalDot.href = svgHref.replace('.svg', '.dot');
-    DOM.externalRepo.href = "https://"+goRepo;
+    DOM.externalRepo.href = "https://" + goRepo;
     DOM.externalGoDoc.href = "https://pkg.go.dev/" + goRepo;
 
     DOM.checkCluster.parentElement.classList.add("visible");
@@ -347,12 +382,17 @@ function loadSvg(svgHref, goRepo, blob) {
     DOM.externalRepo.classList.add("visible");
     DOM.externalGoDoc.classList.add("visible");
     DOM.refreshButton.classList.add("visible");
+    DOM.badge.classList.add("visible");
+
+    DOM.badgeText.value =
+      "[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/" + goRepo + ")";
   } else {
     DOM.checkCluster.parentElement.remove("visible");
     DOM.externalDot.classList.remove("visible");
     DOM.externalRepo.classList.remove("visible");
     DOM.externalGoDoc.classList.remove("visible");
     DOM.refreshButton.classList.remove("visible");
+    DOM.badge.classList.remove("visible");
   }
 }
 
@@ -480,7 +520,7 @@ function initAutoComplete() {
       onSelect: function(e, term, item){
         if (e instanceof KeyboardEvent && e.keyCode === 13) {
           // the input element also handles keyboard enter, skip this one.
-          return
+          return;
         }
         handleInput(false);
         e.preventDefault();

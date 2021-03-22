@@ -80,6 +80,7 @@ body {
   opacity: 0;
   width: inherit;
   transition: opacity 250ms linear;
+  z-index: -1;
 }
 
 #input-error.visible {
@@ -168,9 +169,19 @@ body {
   vertical-align: top;
 }
 
+#refresh {
+  display: none;
+  position: absolute;
+  left: 80px;
+  bottom: 0;
+}
+#refresh.visible {
+  display: inline;
+}
+
 .external-links {
   position: absolute;
-  right: 50px;
+  right: 110px;
   bottom: 0;
 }
 .external-link {
@@ -181,13 +192,24 @@ body {
   display: inline;
 }
 
-#refresh {
+#badge {
   display: none;
   position: absolute;
   right: 2px;
-  bottom: 0;
+  top: 41px;
 }
-#refresh.visible {
+#badge.visible {
+  display: inline;
+}
+
+#badge-markdown {
+  display: none;
+  position: absolute;
+  width: 400px;
+  right: 2px;
+  top: 70px;
+}
+#badge-markdown.visible {
   display: inline;
 }
 

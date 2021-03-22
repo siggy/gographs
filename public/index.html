@@ -31,6 +31,10 @@
         <input type="checkbox" id="check-cluster" checked/>Cluster
       </label>
 
+      <div id="refresh">
+        <button aria-label="Refresh repo"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+      </div>
+
       <div class="external-links">
         <a id="external-repo"  class="external-link" target="_blank">repo  <i class="fa fa-external-link"></i></a>
         <a id="external-godoc" class="external-link" target="_blank">godoc <i class="fa fa-external-link"></i></a>
@@ -38,8 +42,12 @@
         <a id="external-svg"   class="external-link" target="_blank">svg   <i class="fa fa-external-link"></i></a>
       </div>
 
-      <div id="refresh">
-        <button aria-label="Refresh repo"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+      <div id="badge">
+        <input aria-label="gographs badge" type="image" src="/badge.svg" />
+      </div>
+
+      <div id="badge-markdown">
+        <input id="badge-text" type="text" readonly value="[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/github.com/siggy/gographs)" aria-label="Badge Markdown" class="control-panel-module">
       </div>
 
       <div id="input-error" class="control-panel-module"></div>

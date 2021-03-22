@@ -1,8 +1,23 @@
-# GoGraphs
+[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/github.com/siggy/gographs)
 
-[GoGraphs](https://gographs.io) renders dependency graphs for Go packages.
+# gographs
 
-![GoGraphs dependency example](https://gographs.io/repo/github.com/siggy/gographs.svg "GoGraphs Dependencies")
+[gographs](https://gographs.io) renders dependency graphs for Go packages.
+
+![gographs dependency example](https://gographs.io/repo/github.com/siggy/gographs.svg "gographs dependencies")
+
+## Badge Markdown
+
+```md
+[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/GO_REPO)
+```
+
+Example:
+```md
+[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/github.com/siggy/gographs)
+```
+
+Courtesy of [shields.io]([https://shields.io/])
 
 ## HTTP Endpoints
 
@@ -16,15 +31,21 @@ Permalink to view a Go repo SVG.
 
 `text/html; charset=utf-8`
 
+To refresh: use `POST`.
+
 ### [gographs.io/graph/GO_REPO.svg?cluster=false|true](https://gographs.io/graph/github.com/siggy/gographs.svg)
 Go repo SVG direct link.
 
 `image/svg+xml; charset=utf-8`
 
+To refresh: use `POST`.
+
 ### [gographs.io/graph/GO_REPO.dot?cluster=false|true](https://gographs.io/graph/github.com/siggy/gographs.dot)
 Go repo GraphViz DOT direct link.
 
 `text/plain; charset=utf-8`
+
+To refresh: use `POST`.
 
 ### [gographs.io/svg?url=SVG_URL](https://gographs.io/svg?url=https://upload.wikimedia.org/wikipedia/commons/0/05/Go_Logo_Blue.svg)
 Permalink to view an arbitrary SVG URL.
@@ -36,7 +57,7 @@ Permalink to view an arbitrary SVG URL.
 ### First-time setup
 
 ```bash
-go install github.com/loov/goda@v0.2.1
+go install github.com/loov/goda@v0.2.2
 brew install dot # or equivalent
 brew install redis # or equivalent
 redis-server /usr/local/etc/redis.conf
