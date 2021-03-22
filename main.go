@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/siggy/gographs/cache"
-	"github.com/siggy/gographs/web"
+	"github.com/siggy/gographs/pkg/cache"
+	"github.com/siggy/gographs/pkg/web"
 	log "github.com/sirupsen/logrus"
 )
 

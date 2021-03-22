@@ -8,8 +8,8 @@ import (
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/siggy/gographs/cache"
-	"github.com/siggy/gographs/repo"
+	"github.com/siggy/gographs/pkg/cache"
+	"github.com/siggy/gographs/pkg/repo"
 )
 
 // Start initializes the web server and starts listening

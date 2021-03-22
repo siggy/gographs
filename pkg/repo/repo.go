@@ -27,7 +27,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/siggy/gographs/cache"
+	"github.com/siggy/gographs/pkg/cache"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/tools/go/vcs"
 )
