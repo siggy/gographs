@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -81,8 +82,19 @@ func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
 
 		if refresh {
+			// get the repo's current location and delete
+			codeDir, err := cache.GetRepoDir(goRepo)
+			if err == nil && repo.Exists(codeDir) {
+				go func(codeDir string) {
+					err := os.RemoveAll(codeDir)
+					if err != nil {
+						log.Errorf("Failed to remove %s: %s", codeDir, err)
+					}
+				}(codeDir)
+			}
+
 			log.Debugf("Clearing cache for %s", goRepo)
-			err := cache.Clear(goRepo)
+			err = cache.Clear(goRepo)
 			if err != nil {
 				log.Errorf("Failed to clear cache for repo %s: %s", goRepo, err)
 			}

@@ -1,5 +1,10 @@
 package repo
 
+//
+// Based on https://github.com/gojp/goreportcard, specifically:
+// https://github.com/gojp/goreportcard/blob/6ecdf3c5c38cf0855cec02ab2a02ecb78b6e456f/download/download.go
+//
+
 // This package takes GoLang repos as input and outputs SVG and DOT files:
 //
 // 1. repo => dir
@@ -83,10 +88,15 @@ func ToDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 	return dot, nil
 }
 
+func Exists(dir string) bool {
+	_, err := os.Stat(dir)
+	return !os.IsNotExist(err)
+}
+
 func toDir(cache *cache.Cache, repo string) (string, error) {
 	codeDir, err := cache.GetRepoDir(repo)
-	if err == nil && exists(codeDir) {
-		// TODO: refresh, re-download
+	if err == nil && Exists(codeDir) {
+		// repo already present
 		return codeDir, nil
 	}
 
@@ -174,12 +184,6 @@ func dotToSVG(dot string) (string, error) {
 	return string(svg), nil
 }
 
-func exists(dir string) bool {
-	_, err := os.Stat(dir)
-	return !os.IsNotExist(err)
-}
-
-// copied from https://github.com/gojp/goreportcard/blob/7a8a1ebca86e5391abab1f5cee8249ec23708348/download/download.go
 func trimScheme(repo string) string {
 	schemeSep := "://"
 	schemeSepIdx := strings.Index(repo, schemeSep)

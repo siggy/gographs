@@ -66,7 +66,7 @@ redis-server /usr/local/etc/redis.conf
 ### Boot server
 
 ```bash
-go run main.go --addr localhost:8888 --redis-addr localhost:6379 --log-level debug
+go run main.go --log-level debug
 ```
 
 Browse to http://localhost:8888
@@ -85,8 +85,13 @@ deserve calling out:
 - [goda](https://github.com/loov/goda)
 - [SVGPan](https://github.com/ariutta/svg-pan-zoom)
 
+The [`pkg/repo`](./pkg/repo) is based on:
+
+- [Go Report Card](https://github.com/gojp/goreportcard)
+
 ## TODO
 
+- default to root gographs.io without params
 - warning on spinner requests can take up to 1 minute
 - show "Last refresh" time
 - make fonts bigger / easier to read
