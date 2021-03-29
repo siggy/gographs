@@ -2,20 +2,22 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
-
 	"github.com/siggy/gographs/pkg/cache"
 	"github.com/siggy/gographs/pkg/repo"
+	log "github.com/sirupsen/logrus"
 )
 
-// Start initializes the web server and starts listening
+// Start initializes the web server and starts listening.
 func Start(c *cache.Cache, addr string) error {
 	router := mux.NewRouter()
+	router.Use(prometheusMiddleware)
+
 	getRouter := router.Methods(http.MethodGet).Subrouter()
 	postRouter := router.Methods(http.MethodPost).Subrouter()
 
@@ -49,7 +51,6 @@ func repoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
-
 	// GET  /graph/github.com/siggy/gographs.svg
 	// POST /graph/github.com/siggy/gographs.svg (for refresh)
 	return func(rw http.ResponseWriter, r *http.Request) {
@@ -60,8 +61,7 @@ func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 
 		tpl, err := mux.CurrentRoute(r).GetPathTemplate()
 		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			rw.Write([]byte(err.Error()))
+			writeError(rw, r, http.StatusInternalServerError, err.Error(), err)
 			return
 		}
 
@@ -74,8 +74,7 @@ func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 			suffix = ".dot"
 			contentType = "text/plain; charset=utf-8"
 		} else {
-			rw.WriteHeader(http.StatusBadRequest)
-			rw.Write([]byte("svg or dot suffix required"))
+			writeError(rw, r, http.StatusBadRequest, "svg or dot suffix required", nil)
 			return
 		}
 
@@ -109,8 +108,8 @@ func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 			out, err = repo.ToDOT(cache, goRepo, cluster)
 		}
 		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			rw.Write([]byte(err.Error()))
+			message := fmt.Sprintf("Failed to render %s to %s", goRepo, suffix)
+			writeError(rw, r, http.StatusInternalServerError, message, err)
 			return
 		}
 
@@ -128,19 +127,19 @@ func mkTopReposHandler(cache *cache.Cache) http.HandlerFunc {
 	// /top-repos
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			rw.WriteHeader(http.StatusMethodNotAllowed)
+			writeError(rw, r, http.StatusMethodNotAllowed, "", nil)
 			return
 		}
 
 		scores, err := cache.RepoScores()
 		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
+			writeError(rw, r, http.StatusInternalServerError, "", err)
 			return
 		}
 
 		j, err := json.Marshal(scores)
 		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
+			writeError(rw, r, http.StatusInternalServerError, "", err)
 			return
 		}
 
@@ -148,4 +147,19 @@ func mkTopReposHandler(cache *cache.Cache) http.HandlerFunc {
 		rw.WriteHeader(http.StatusOK)
 		rw.Write([]byte(j))
 	}
+}
+
+// writeError handles all errors returned by the web server. It writes an error
+// header, an optional error message, counts the error in metrics, and logs it.
+func writeError(rw http.ResponseWriter, r *http.Request, status int, message string, err error) {
+	rw.WriteHeader(status)
+	if message != "" {
+		rw.Write([]byte(message))
+	}
+
+	route := mux.CurrentRoute(r)
+	path, _ := route.GetPathTemplate()
+
+	log.Errorf("Failed request for [%s]: [%d] Message: [%s] Error: [%s]", path, status, message, err)
+	countError(r, status, message, err)
 }

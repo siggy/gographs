@@ -71,10 +71,10 @@ go run main.go --log-level debug
 
 Browse to http://localhost:8888
 
-## Testing
+## Lint check
 
 ```bash
-golint ./...
+bin/lint
 ```
 
 ## Credits
@@ -91,6 +91,7 @@ The [`pkg/repo`](./pkg/repo) is based on:
 
 ## TODO
 
+- update URL immediately
 - warning on spinner requests can take up to 1 minute
 - show "Last refresh" time
 - make fonts bigger / easier to read

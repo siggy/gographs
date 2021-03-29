@@ -1,0 +1,33 @@
+#!/usr/bin/env sh
+
+# copied from https://github.com/BuoyantIO/linkerd-buoyant/blob/e1212a9297672033840547ac197519e3e959d130/bin/lint
+
+set -eu
+
+lintversion=1.32.2
+
+cd "$(pwd -P)"
+
+bindir=$( cd "${0%/*}" && pwd )
+rootdir=$( cd "$bindir"/.. && pwd )
+targetbin=$rootdir/target/bin
+
+cd "$rootdir"
+
+exe=
+if [ "$(uname -s)" = Darwin ]; then
+  # Darwin's uname doesn't support the -o flag so we short circuit here.
+  :;
+elif [ "$(uname -o)" = Msys ]; then
+  exe=.exe
+fi
+
+lintbin=$targetbin/.golangci-lint-$lintversion$exe
+
+if [ ! -f "$lintbin" ]; then
+  mkdir -p "$targetbin"
+  curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/v$lintversion/install.sh | sh -s -- -b . v$lintversion
+  mv ./golangci-lint$exe "$lintbin"
+fi
+
+"$lintbin" run "$@"

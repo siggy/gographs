@@ -10,8 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var repo = "github.com/siggy/gographs"
-
 func main() {
 	addr := flag.String("addr", "localhost:8888", "address to listen on")
 	logLevel := flag.String("log-level", log.DebugLevel.String(), "log level, must be one of: panic, fatal, error, warn, info, debug, trace")
