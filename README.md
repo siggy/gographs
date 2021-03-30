@@ -92,6 +92,10 @@ The [`pkg/repo`](./pkg/repo) is based on:
 ## TODO
 
 - update URL immediately
+- link to dependenices in graphs
+- rename godoc
+- update URL immediately on user input?
+  - fix history getting lost
 - warning on spinner requests can take up to 1 minute
 - show "Last refresh" time
 - make fonts bigger / easier to read
