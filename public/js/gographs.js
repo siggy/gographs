@@ -346,6 +346,9 @@ function handleInput(refresh) {
         urlState.searchParams.append("cluster", "true");
       }
 
+      document.title =  goRepo ?
+        'gographs / ' + goRepo:
+        'gographs';
       history.pushState(
         { svgHref: url.href, goRepo: goRepo, blob: blob },
         input,
