@@ -1,0 +1,83 @@
+# This file specifies which linters golangci-lint should run.
+#
+# For descriptions of all available linters, run:
+# ./.golangci-lint-1.37.0 linters
+# or browse to:
+# https://github.com/golangci/golangci-lint#supported-linters
+
+run:
+  deadline: 5m
+issues:
+  exclude-use-default: false
+linters:
+  enable:
+  - asciicheck
+  - bodyclose
+  - deadcode
+  - depguard
+  - dogsled
+  - exportloopref
+  - goconst
+  - goheader
+  - goimports
+  - gomodguard
+  - goprintffuncname
+  - gosimple
+  - govet
+  - ineffassign
+  - interfacer
+  - maligned
+  - misspell
+  - nakedret
+  - nolintlint
+  - predeclared
+  - rowserrcheck
+  - scopelint
+  - sqlclosecheck
+  - structcheck
+  - tparallel
+  - typecheck
+  - unconvert
+  - unparam
+  - unused
+  - varcheck
+  - whitespace
+  # TODO: enable more linters!
+  # - cyclop
+  # - dupl
+  # - durationcheck
+  # - errorlint
+  # - exhaustive
+  # - exhaustivestruct
+  # - forbidigo
+  # - funlen
+  # - gci
+  # - gochecknoglobals
+  # - gochecknoinits
+  # - gocognit
+  # - gocritic
+  # - gocyclo
+  # - godot
+  # - godox
+  # - goerr113
+  # - gofmt
+  # - gofumpt
+  # - golint
+  # - gomnd
+  # - gosec
+  # - ifshort
+  # - lll
+  # - makezero
+  # - nestif
+  # - nlreturn
+  # - noctx
+  # - prealloc
+  # - revive
+  # - stylecheck
+  # - testpackage
+  # - thelper
+  # - wrapcheck
+  # - wsl
+  disable:
+  - errcheck
+  - staticcheck

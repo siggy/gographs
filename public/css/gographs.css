@@ -58,6 +58,20 @@ body {
 }
 
 /*
+ * dangerous refresh button
+ */
+
+#refresh {
+  display: none;
+  position: absolute;
+  right: 25px;
+  bottom: 80px;
+}
+#refresh.visible {
+  display: inline;
+}
+
+/*
  * primary input text
  */
 
@@ -166,17 +180,7 @@ body {
 }
 
 #check-cluster {
-  vertical-align: top;
-}
-
-#refresh {
-  display: none;
-  position: absolute;
-  left: 80px;
-  bottom: 0;
-}
-#refresh.visible {
-  display: inline;
+  vertical-align: bottom;
 }
 
 .external-links {
