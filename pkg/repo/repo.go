@@ -10,7 +10,7 @@ package repo
 // 1. repo => dir
 //    git clone --depth 1 https://github.com/siggy/gographs /repos/https://github.com/siggy/gographs"
 // 2. dir => dot
-//    goda graph -short -cluster github.com/siggy/gographs...:root
+//    goda graph -short -cluster github.com/siggy/gographs...
 // 3. dot => svg
 //    echo "..." | dot -Tsvg -o graph2.svg
 //
@@ -136,7 +136,7 @@ func dirToDot(dir string, cluster bool) (string, error) {
 	if cluster {
 		args = append(args, "-cluster")
 	}
-	args = append(args, "./...:root")
+	args = append(args, "./...")
 
 	cmd := exec.Command("goda", args...)
 	cmd.Dir = dir
