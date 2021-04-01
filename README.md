@@ -88,29 +88,3 @@ deserve calling out:
 The [`pkg/repo`](./pkg/repo) is based on:
 
 - [Go Report Card](https://github.com/gojp/goreportcard)
-
-## TODO
-
-- update URL immediately
-- link to dependenices in graphs
-- rename godoc
-- update URL immediately on user input?
-  - fix history getting lost
-- warning on spinner requests can take up to 1 minute
-- show "Last refresh" time
-- make fonts bigger / easier to read
-- fix thumbnail click to move not tracking the click point exactly
-- fix http://localhost:8888/?repo=github.com/kubernetes/kubernetes&cluster=true
-- deterministic repo location, with cli flag?
-- don't shell out
-- landing page
-- prod
-  - monitoring, cache hits/misses
-- graphs by repo revision
-- fix new svg loading on firefox
-- prevent normal dragging on mobile
-- fix thumbnail resize/refresh jitter
-- fix irc logo thumbnail border aspect ratio
-- show progress during repo compile
-- consider capturing all mouse scrolling over every element
-- on drag mouseup, don't open godoc link
