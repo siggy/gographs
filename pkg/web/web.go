@@ -123,7 +123,6 @@ func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 
 // TODO: poll for this every interval, hold result in local mem
 func mkTopReposHandler(cache *cache.Cache) http.HandlerFunc {
-
 	// /top-repos
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -145,7 +144,7 @@ func mkTopReposHandler(cache *cache.Cache) http.HandlerFunc {
 
 		rw.Header().Set("Content-Type", "application/json; charset=utf-8")
 		rw.WriteHeader(http.StatusOK)
-		rw.Write([]byte(j))
+		rw.Write(j)
 	}
 }
 

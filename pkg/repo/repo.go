@@ -136,7 +136,7 @@ func dirToDot(dir string, cluster bool) (string, error) {
 	if cluster {
 		args = append(args, "-cluster")
 	}
-	args = append(args, fmt.Sprintf("./...:root"))
+	args = append(args, "./...:root")
 
 	cmd := exec.Command("goda", args...)
 	cmd.Dir = dir
@@ -152,14 +152,14 @@ func dirToDot(dir string, cluster bool) (string, error) {
 		return "", err
 	}
 
-	serr := string(stderr.Bytes())
+	serr := stderr.String()
 	if strings.Contains(serr, "matched no packages") {
-		err := fmt.Errorf("goda cmd returned stderr: %s", string(stderr.Bytes()))
+		err := fmt.Errorf("goda cmd returned stderr: %s", serr)
 		log.Error(err)
 		return "", err
 	}
 
-	return string(stdout.Bytes()), nil
+	return stdout.String(), nil
 }
 
 func dotToSVG(dot string) (string, error) {
@@ -178,7 +178,7 @@ func dotToSVG(dot string) (string, error) {
 	svg, err := command.Output()
 	if err != nil {
 		log.Errorf("dot cmd failed: %s", err)
-		return "", nil
+		return "", err
 	}
 
 	return string(svg), nil
