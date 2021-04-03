@@ -27,6 +27,14 @@ const DOM = {
 };
 
 /*
+ * Disable touch scrolling on mobile
+ */
+
+window.addEventListener('touchmove', function (event) {
+  e.preventDefault();
+}, false);
+
+/*
  * window.onload
  */
 
