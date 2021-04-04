@@ -71,7 +71,7 @@ function updateInputsFromUrl() {
     DOM.mainInput.value = searchParams.get('url');
   } else {
     // unrecognized URL, reset everything to default
-    DOM.mainInput.value = defaultRepo;
+    DOM.mainInput.value = "";
     DOM.checkCluster.checked = defaultCluster;
   }
 
@@ -296,10 +296,8 @@ function checkStatus(response) {
 }
 
 function handleInput(refresh) {
-  const input = (DOM.mainInput.value !== "") ?
-    DOM.mainInput.value.trim() :
-    defaultRepo;
-  const cluster = DOM.checkCluster.checked;
+  const isDefault = (DOM.mainInput.value === "" && DOM.checkCluster.checked === defaultCluster);
+  const input = isDefault ? defaultRepo : DOM.mainInput.value.trim();
 
   DOM.badgeMarkdown.classList.remove("visible");
 
@@ -324,10 +322,10 @@ function handleInput(refresh) {
     } else if (input.startsWith('http://')) {
       goRepo = input.slice('http://'.length);
     }
-    DOM.mainInput.value = goRepo;
+    DOM.mainInput.value = isDefault ? "" : goRepo;
 
     url = new URL('/graph/' + goRepo + '.svg', window.location.origin);
-    if (cluster === true) {
+    if (DOM.checkCluster.checked) {
       url.searchParams.append("cluster", "true");
     }
   }
@@ -340,17 +338,15 @@ function handleInput(refresh) {
     .then(checkStatus)
     .then(resp => resp.blob())
     .then(blob => {
-      const defaultInput = (goRepo === defaultRepo && cluster === defaultCluster);
-
       let path = '';
-      if (!defaultInput) {
+      if (!isDefault) {
         path = goRepo ?
         '/repo/'+goRepo :
         '/svg?url='+url;
       }
 
       const urlState = new URL(path, window.location.origin);
-      if (!defaultInput && cluster) {
+      if (!isDefault && DOM.checkCluster.checked) {
         urlState.searchParams.append("cluster", "true");
       }
 
