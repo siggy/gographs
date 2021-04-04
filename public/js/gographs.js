@@ -346,7 +346,7 @@ function handleInput(refresh) {
       }
 
       const urlState = new URL(path, window.location.origin);
-      if (!isDefault && DOM.checkCluster.checked) {
+      if (!isDefault && DOM.checkCluster.checked && goRepo) {
         urlState.searchParams.append("cluster", "true");
       }
 

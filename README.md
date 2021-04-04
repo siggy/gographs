@@ -1,10 +1,10 @@
 # gographs
 
-[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/github.com/siggy/gographs)
+[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/github.com/siggy/gographs?cluster=true)
 
 [gographs](https://gographs.io) renders dependency graphs for Go packages.
 
-[![gographs dependency example](https://gographs.io/graph/github.com/siggy/gographs.svg?cluster=true)]([https://gographs.io/repo/github.com/siggy/gographs "gographs dependencies")
+[![gographs dependency example](https://gographs.io/graph/github.com/siggy/gographs.svg?cluster=true)](https://gographs.io/repo/github.com/siggy/gographs?cluster=true)
 
 ## Badge Markdown
 
