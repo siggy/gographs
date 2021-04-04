@@ -20,6 +20,7 @@ linters:
   - goconst
   - goheader
   - goimports
+  - golint
   - gomodguard
   - goprintffuncname
   - gosimple
@@ -62,7 +63,6 @@ linters:
   # - goerr113
   # - gofmt
   # - gofumpt
-  # - golint
   # - gomnd
   # - gosec
   # - ifshort

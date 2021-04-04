@@ -397,8 +397,9 @@ function loadSvg(svgHref, goRepo, blob) {
     DOM.refreshButton.classList.add("visible");
     DOM.badge.classList.add("visible");
 
+    const clusterParam = svgHref.indexOf("?cluster=true") !== -1 ? "?cluster=true" : ""
     DOM.badgeText.value =
-      "[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/" + goRepo + ")";
+      "[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/" + goRepo + clusterParam + ")";
   } else {
     DOM.checkCluster.parentElement.remove("visible");
     DOM.externalDot.classList.remove("visible");

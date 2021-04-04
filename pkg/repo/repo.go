@@ -88,6 +88,7 @@ func ToDOT(cache *cache.Cache, repo string, cluster bool) (string, error) {
 	return dot, nil
 }
 
+// Exists returns true if the input directory exists.
 func Exists(dir string) bool {
 	_, err := os.Stat(dir)
 	return !os.IsNotExist(err)

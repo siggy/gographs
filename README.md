@@ -62,4 +62,4 @@ deserve special mention, as this site is essentially a mashup of them:
 
 [`pkg/repo`](./pkg/repo) is based on [Go Report Card](https://github.com/gojp/goreportcard)
 
-[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/github.com/siggy/gographs) courtesy of [shields.io](https://shields.io/)
+[![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/github.com/siggy/gographs?cluster=true) courtesy of [shields.io](https://shields.io/)
