@@ -59,7 +59,7 @@ This tool is built using many open source packages, but two in particular
 deserve special mention, as this site is essentially a mashup of them:
 
 - [goda](https://github.com/loov/goda)
-- [SVGPan](https://github.com/ariutta/svg-pan-zoom)
+- [SVGPan](https://github.com/bumbu/svg-pan-zoom)
 
 [`pkg/repo`](./pkg/repo) is based on [Go Report Card](https://github.com/gojp/goreportcard)
 

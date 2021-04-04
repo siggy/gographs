@@ -233,7 +233,7 @@ body {
 /*
  * spinner
  *
- * based on: // TODO: move to JS
+ * based on:
  * https://dev.to/wangonya/displaying-a-css-spinner-on-ajax-calls-with-fetch-api-4ndo
  */
 
@@ -268,6 +268,17 @@ body {
   to {
     transform: rotate(360deg);
   }
+}
+
+#spinner .message {
+  position: fixed;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  background-color: rgb(243,243,243);;
+  padding: 4px;
+  border-radius: 4px;
+  transform: translate(0, 70px);
 }
 
 /*

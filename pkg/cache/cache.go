@@ -92,11 +92,6 @@ func (c *Cache) Clear(repo string) error {
 		rerr = err
 	}
 
-	_, err = c.client.ZRem(repoScores, repo).Result()
-	if err != nil && rerr == nil {
-		rerr = err
-	}
-
 	return rerr
 }
 
@@ -152,7 +147,7 @@ func (c *Cache) RepoScores() ([]string, error) {
 		Min:    "0",
 		Max:    "+inf",
 		Offset: 0,
-		Count:  10,
+		Count:  1000,
 	})
 	if cmd.Err() != nil {
 		return nil, cmd.Err()

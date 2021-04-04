@@ -411,7 +411,7 @@ function loadSvg(svgHref, goRepo, blob) {
 }
 
 // based on:
-// https://github.com/ariutta/svg-pan-zoom/blob/d107d73120460caae3ecee59192cd29a470e97b0/demo/thumbnailViewer.js
+// https://github.com/bumbu/svg-pan-zoom/blob/d107d73120460caae3ecee59192cd29a470e97b0/demo/thumbnailViewer.js
 
 function updateThumbScope() {
   const thumbToMainZoomRatio = window.thumb.getSizes().realZoom / window.main.getSizes().realZoom;
