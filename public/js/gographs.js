@@ -297,7 +297,7 @@ function checkStatus(response) {
 
 function handleInput(refresh) {
   const isDefault = (DOM.mainInput.value === "" && DOM.checkCluster.checked === defaultCluster);
-  const input = isDefault ? defaultRepo : DOM.mainInput.value.trim();
+  const input = DOM.mainInput.value || defaultRepo;
 
   DOM.badgeMarkdown.classList.remove("visible");
 
