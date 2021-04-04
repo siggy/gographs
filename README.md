@@ -1,6 +1,7 @@
 # gographs
 
 [![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/github.com/siggy/gographs?cluster=true)
+[![Go Report Card](https://goreportcard.com/badge/github.com/siggy/gographs)](https://goreportcard.com/report/github.com/siggy/gographs)
 
 [gographs](https://gographs.io) renders dependency graphs for Go packages.
 
