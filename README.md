@@ -5,7 +5,7 @@
 
 [gographs](https://gographs.io) renders dependency graphs for Go packages.
 
-[![gographs dependency example](https://gographs.io/graph/github.com/siggy/gographs.svg?cluster=true)](https://gographs.io/repo/github.com/siggy/gographs?cluster=true)
+[![gographs dependency example](https://gographs.io/graph/github.com/siggy/gographs.svg?cluster=true)](https://gographs.io)
 
 ## Badge Markdown
 
@@ -64,3 +64,14 @@ deserve special mention, as this site is essentially a mashup of them:
 [`pkg/repo`](./pkg/repo) is based on [Go Report Card](https://github.com/gojp/goreportcard)
 
 [![gographs](https://gographs.io/badge.svg)](https://gographs.io/repo/github.com/siggy/gographs?cluster=true) courtesy of [shields.io](https://shields.io/)
+
+## Support
+
+It costs about one cup of coffee per day to run
+[gographs.io](https://gographs.io). Buy me a cup of coffee and you've funded
+[gographs.io](https://gographs.io) for a whole day!
+
+<a href="https://www.buymeacoffee.com/siggy" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
+[![cash.app](public/img/cash.app.svg)](https://cash.app/$siggy)
+[![paypal.me](public/img/paypal.me.svg)](https://paypal.me/andrewseigner)
