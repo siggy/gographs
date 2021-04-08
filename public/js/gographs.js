@@ -522,11 +522,10 @@ function initAutoComplete() {
       cache: false,
       source: function(term, suggest){
         term = term.toLowerCase();
-        const choices = json.slice(0,10);
         const suggestions = [];
-        for (let i=0; i<choices.length; i++) {
-          if (~choices[i].toLowerCase().indexOf(term)) {
-            suggestions.push(choices[i]);
+        for (let i=0; i<json.length; i++) {
+          if (~json[i].toLowerCase().indexOf(term)) {
+            suggestions.push(json[i]);
           }
         }
         suggest(suggestions);
