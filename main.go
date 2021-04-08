@@ -4,6 +4,8 @@ import (
 	"flag"
 	"net/http"
 
+	_ "net/http/pprof"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/siggy/gographs/pkg/cache"
 	"github.com/siggy/gographs/pkg/web"
