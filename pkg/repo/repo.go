@@ -12,7 +12,12 @@ package repo
 // 2. dir => dot
 //    goda graph -short -cluster github.com/siggy/gographs...
 // 3. dot => svg
-//    echo "..." | dot -Tsvg -o graph2.svg
+//    echo "..." | \
+//      dot -Tsvg \
+//      -Gfontname=Roboto,Arial,sans-serif \
+//      -Nfontname=Roboto,Arial,sans-serif \
+//      -Efontname=Roboto,Arial,sans-serif \
+//      -o graph2.svg
 //
 // Nested control-flow accommodates caching at all levels:
 //
