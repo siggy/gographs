@@ -4,26 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/siggy/gographs/pkg/cache"
-	"github.com/siggy/gographs/pkg/repo"
+	"github.com/siggy/gographs/pkg/graph"
+	"github.com/siggy/gographs/pkg/prom"
+	"github.com/siggy/gographs/pkg/render"
 	log "github.com/sirupsen/logrus"
 )
 
+const webServer = "web"
+
 // Start initializes the web server and starts listening.
-func Start(c *cache.Cache, addr string) error {
+func Start(c *cache.Cache, addr string, graph *graph.Client) error {
 	router := mux.NewRouter()
-	router.Use(prometheusMiddleware)
+	router.Use(prom.Middleware(webServer))
 
 	getRouter := router.Methods(http.MethodGet).Subrouter()
 	postRouter := router.Methods(http.MethodPost).Subrouter()
 
 	log := log.WithFields(
 		log.Fields{
-			"web": addr,
+			webServer: addr,
 		},
 	)
 
@@ -33,7 +36,7 @@ func Start(c *cache.Cache, addr string) error {
 	getRouter.HandleFunc("/", repoHandler)
 
 	// apis
-	graphHandler := mkGraphHandler(c, log)
+	graphHandler := mkGraphHandler(graph, c, log)
 	getRouter.PathPrefix("/graph").HandlerFunc(graphHandler)
 	postRouter.PathPrefix("/graph").HandlerFunc(graphHandler)
 	getRouter.HandleFunc("/top-repos", mkTopReposHandler(c))
@@ -41,7 +44,7 @@ func Start(c *cache.Cache, addr string) error {
 	// assets
 	getRouter.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
-	log.Infof("Web server listening on %s", addr)
+	log.Infof("%s server listening on %s", webServer, addr)
 
 	return http.ListenAndServe(addr, router)
 }
@@ -50,7 +53,7 @@ func repoHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "public/index.html")
 }
 
-func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
+func mkGraphHandler(graph *graph.Client, cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 	// GET  /graph/github.com/siggy/gographs.svg
 	// POST /graph/github.com/siggy/gographs.svg (for refresh)
 	return func(rw http.ResponseWriter, r *http.Request) {
@@ -81,17 +84,6 @@ func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 		goRepo := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, tpl+"/"), suffix)
 
 		if refresh {
-			// get the repo's current location and delete
-			codeDir, err := cache.GetRepoDir(goRepo)
-			if err == nil && repo.Exists(codeDir) {
-				go func(codeDir string) {
-					err := os.RemoveAll(codeDir)
-					if err != nil {
-						log.Errorf("Failed to remove %s: %s", codeDir, err)
-					}
-				}(codeDir)
-			}
-
 			log.Debugf("Clearing cache for %s", goRepo)
 			err = cache.Clear(goRepo)
 			if err != nil {
@@ -103,9 +95,9 @@ func mkGraphHandler(cache *cache.Cache, log *log.Entry) http.HandlerFunc {
 
 		out := ""
 		if suffix == ".svg" {
-			out, err = repo.ToSVG(cache, goRepo, cluster)
+			out, err = render.ToSVG(graph, cache, goRepo, cluster)
 		} else if suffix == ".dot" {
-			out, err = repo.ToDOT(cache, goRepo, cluster)
+			out, err = render.ToDOT(graph, cache, goRepo, cluster)
 		}
 		if err != nil {
 			message := fmt.Sprintf("Failed to render %s to %s", goRepo, suffix)
@@ -160,5 +152,5 @@ func writeError(rw http.ResponseWriter, r *http.Request, status int, message str
 	path, _ := route.GetPathTemplate()
 
 	log.Errorf("Failed request for [%s]: [%d] Message: [%s] Error: [%s]", path, status, message, err)
-	countError(r, status, message, err)
+	prom.CountError(webServer, r, status, message, err)
 }

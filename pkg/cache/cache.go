@@ -14,12 +14,6 @@ type Cache struct {
 }
 
 const (
-	// repo-dir[repo]
-	// github.com/siggy/gographs
-	// =>
-	// /tmp/foo
-	repoDirHash = "repodir"
-
 	// dot[repo+cluster]
 	// github.com/siggy/gographs+false
 	// =>
@@ -69,12 +63,7 @@ func New(addr string) (*Cache, error) {
 // Clear deletes all cache entries relevant to a GoLang repo.
 func (c *Cache) Clear(repo string) error {
 	var rerr error
-	_, err := c.hdel(repoDirHash, repo)
-	if err != nil && rerr == nil {
-		rerr = err
-	}
-
-	_, err = c.hdel(dotHash, repoKey(repo, false))
+	_, err := c.hdel(dotHash, repoKey(repo, false))
 	if err != nil && rerr == nil {
 		rerr = err
 	}
@@ -117,23 +106,6 @@ func (c *Cache) SetDOT(repo string, cluster bool, dot string) {
 // GetDOT gets a DOT for a repo.
 func (c *Cache) GetDOT(repo string, cluster bool) (string, error) {
 	return c.hget(dotHash, repoKey(repo, cluster))
-}
-
-// SetRepoDir sets a directory for a repo.
-func (c *Cache) SetRepoDir(repo string, repoDir string) {
-	if err := c.hset(repoDirHash, repo, repoDir); err != nil {
-		c.log.Errorf("SetRepoDir failed: %s", err)
-	}
-}
-
-// GetRepoDir get a directory for a repo.
-func (c *Cache) GetRepoDir(repo string) (string, error) {
-	return c.hget(repoDirHash, repo)
-}
-
-// DelRepoDir deletes the directory cache entry for a repo.
-func (c *Cache) DelRepoDir(repo string) (int64, error) {
-	return c.hdel(repoDirHash, repo)
 }
 
 // RepoScoreIncr increments the popularity score for a repo.

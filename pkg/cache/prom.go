@@ -7,7 +7,6 @@ import (
 )
 
 func registerGauges(client *redis.Client) {
-	registerHashGauge(client, repoDirHash)
 	registerHashGauge(client, dotHash)
 	registerHashGauge(client, svgHash)
 	registerSetGauge(client, repoScores)
