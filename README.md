@@ -33,7 +33,7 @@ Example
 ### First-time setup
 
 ```bash
-go install github.com/loov/goda@v0.4.1
+go install github.com/loov/goda@v0.4.3
 brew install dot # or equivalent
 brew install redis # or equivalent
 redis-server /usr/local/etc/redis.conf

@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis/v8"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -15,7 +15,7 @@ func registerGauges(client *redis.Client) {
 func registerHashGauge(client *redis.Client, key string) {
 	registerGauge(
 		func() float64 {
-			size, _ := client.HLen(key).Result()
+			size, _ := client.HLen(client.Context(), key).Result()
 			return float64(size)
 		},
 		key,
@@ -25,7 +25,7 @@ func registerHashGauge(client *redis.Client, key string) {
 func registerSetGauge(client *redis.Client, key string) {
 	registerGauge(
 		func() float64 {
-			size, _ := client.ZCount(key, "-inf", "+inf").Result()
+			size, _ := client.ZCount(client.Context(), key, "-inf", "+inf").Result()
 			return float64(size)
 		},
 		key,

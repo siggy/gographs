@@ -3,7 +3,7 @@ package cache
 import (
 	"fmt"
 
-	"github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -39,7 +39,7 @@ func New(addr string) (*Cache, error) {
 		Addr: addr,
 	})
 
-	_, err := client.Ping().Result()
+	_, err := client.Ping(client.Context()).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -110,12 +110,12 @@ func (c *Cache) GetDOT(repo string, cluster bool) (string, error) {
 
 // RepoScoreIncr increments the popularity score for a repo.
 func (c *Cache) RepoScoreIncr(repo string) {
-	c.client.ZIncrBy(repoScores, 1, repo)
+	c.client.ZIncrBy(c.client.Context(), repoScores, 1, repo)
 }
 
 // RepoScores returns the top-10 most popular repos
 func (c *Cache) RepoScores() ([]string, error) {
-	cmd := c.client.ZRevRangeByScore(repoScores, &redis.ZRangeBy{
+	cmd := c.client.ZRevRangeByScore(c.client.Context(), repoScores, &redis.ZRangeBy{
 		Min:    "0",
 		Max:    "+inf",
 		Offset: 0,
@@ -130,17 +130,17 @@ func (c *Cache) RepoScores() ([]string, error) {
 
 func (c *Cache) hget(key, field string) (string, error) {
 	c.log.Tracef("hget[%s,%s]", key, field)
-	return c.client.HGet(key, field).Result()
+	return c.client.HGet(c.client.Context(), key, field).Result()
 }
 
 func (c *Cache) hset(key, field string, value interface{}) error {
 	c.log.Tracef("hset[%s,%s]", key, field)
-	return c.client.HSet(key, field, value).Err()
+	return c.client.HSet(c.client.Context(), key, field, value).Err()
 }
 
 func (c *Cache) hdel(key, field string) (int64, error) {
 	c.log.Debugf("hdel[%s,%s]", key, field)
-	return c.client.HDel(key, field).Result()
+	return c.client.HDel(c.client.Context(), key, field).Result()
 }
 
 func repoKey(repo string, cluster bool) string {
