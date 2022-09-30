@@ -24,9 +24,10 @@ import (
 	"os/exec"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/siggy/gographs/pkg/cache"
 	"github.com/siggy/gographs/pkg/graph"
-	log "github.com/sirupsen/logrus"
 )
 
 // ToSVG takes a GoLang repo as input and returns an SVG dependency graph
@@ -56,7 +57,7 @@ func ToSVG(graph *graph.Client, cache *cache.Cache, repo string, cluster bool) (
 // ToDOT takes a GoLang repo as input and returns a DOT dependency graph
 func ToDOT(graph *graph.Client, cache *cache.Cache, repo string, cluster bool) (string, error) {
 	dot, err := cache.GetDOT(repo, cluster)
-	if err == nil {
+	if err == nil && !strings.HasPrefix(dot, "Failed") {
 		return dot, nil
 	}
 
