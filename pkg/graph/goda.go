@@ -81,7 +81,7 @@ func dirToDot(dir string, cluster bool) (string, error) {
 	log.Debugf("running goda: %s", cmd)
 	err := cmd.Run()
 	if err != nil {
-		log.Errorf("goda cmd failed: %s", err)
+		log.Errorf("goda cmd failed [%s]: %s", err, stderr.String())
 		return "", err
 	}
 

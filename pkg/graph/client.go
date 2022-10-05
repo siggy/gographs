@@ -3,6 +3,7 @@ package graph
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -85,7 +86,14 @@ func (c *Client) Get(repo string, cluster bool) (string, error) {
 		return "", err
 	}
 
-	c.log.Debugf("POST Response: %s (%d bytes)", string(body), len(respBody))
+	debugStr := fmt.Sprintf("POST response[%d] (%d bytes): %s ", resp.StatusCode, len(respBody), string(respBody))
+	c.log.Debug(debugStr)
+
+	if resp.StatusCode != http.StatusOK {
+		err := errors.New(debugStr)
+		httpErrors.WithLabelValues(err.Error()).Inc()
+		return "", err
+	}
 
 	return string(respBody), nil
 }
