@@ -28,7 +28,7 @@ func main() {
 	graphAddr := flag.String("graph-addr", graph.DefaultGraphAddr, "graph address to listen on")
 	logLevel := flag.String("log-level", log.DebugLevel.String(), "log level, must be one of: panic, fatal, error, warn, info, debug, trace")
 	metricsAddr := flag.String("metrics-addr", "localhost:8080", "address to listen on for metrics requests")
-	redisAddr := flag.String("redis-addr", "localhost:6379", "address to connect to redis")
+	valkeyAddr := flag.String("valkey-addr", "localhost:6379", "address to connect to valkey")
 	flag.Parse()
 
 	level, err := log.ParseLevel(*logLevel)
@@ -57,7 +57,7 @@ func main() {
 
 	if *target == targetAll || *target == targetWeb {
 		go func() {
-			c, err := cache.New(*redisAddr)
+			c, err := cache.New(*valkeyAddr)
 			if err != nil {
 				log.Fatalf("failed to initialize cache: %s", err)
 			}
