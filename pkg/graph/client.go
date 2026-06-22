@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -63,7 +63,7 @@ func (c *Client) Get(repo string, cluster bool) (string, error) {
 
 	c.log.Debugf("POST Request: %s", string(body))
 
-	labels := prometheus.Labels{"repo": repo, "cluster": strconv.FormatBool(cluster)}
+	labels := prometheus.Labels{repoLabel: repo, clusterLabel: strconv.FormatBool(cluster)}
 	httpRequests.With(labels).Inc()
 	httpErrors, err := httpErrors.CurryWith(labels)
 	if err != nil {
@@ -80,7 +80,7 @@ func (c *Client) Get(repo string, cluster bool) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		httpErrors.WithLabelValues(err.Error()).Inc()
 		return "", err

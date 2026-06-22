@@ -8,28 +8,36 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+const (
+	gographsNamespace = "gographs"
+	serverSubsystem   = "server"
+	serverLabel       = "server"
+	methodLabel       = "method"
+	pathLabel         = "path"
+)
+
 var (
 	httpRequests = promauto.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "gographs",
-		Subsystem: "server",
+		Namespace: gographsNamespace,
+		Subsystem: serverSubsystem,
 		Name:      "requests_total",
 		Help:      "Count of HTTP requests.",
-	}, []string{"server", "method", "path"})
+	}, []string{serverLabel, methodLabel, pathLabel})
 
 	httpErrors = promauto.NewCounterVec(prometheus.CounterOpts{
-		Namespace: "gographs",
-		Subsystem: "server",
+		Namespace: gographsNamespace,
+		Subsystem: serverSubsystem,
 		Name:      "errors_total",
 		Help:      "Count of HTTP errors.",
-	}, []string{"server", "method", "path", "status", "message", "error"})
+	}, []string{serverLabel, methodLabel, pathLabel, "status", "message", "error"})
 
 	httpDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "gographs",
-		Subsystem: "server",
+		Namespace: gographsNamespace,
+		Subsystem: serverSubsystem,
 		Name:      "duration_seconds",
 		Help:      "Duration of HTTP requests.",
 		Buckets:   prometheus.ExponentialBuckets(0.001, 1.3, 50),
-	}, []string{"server", "method", "path"})
+	}, []string{serverLabel, methodLabel, pathLabel})
 )
 
 // Middleware returns a function that implements mux.MiddlewareFunc.
