@@ -33,7 +33,7 @@ Example
 ### First-time setup
 
 ```bash
-go get -tool github.com/loov/goda@v0.9.3
+go install tool
 brew install graphviz # or equivalent
 brew install valkey # or equivalent
 valkey-cli ping

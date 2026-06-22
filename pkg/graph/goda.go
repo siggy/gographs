@@ -17,32 +17,9 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
-	"sync"
 
 	log "github.com/sirupsen/logrus"
 )
-
-// godaOnce resolves the goda tool binary once, from the gographs module's
-// go.mod tool directive. Resolving here (rather than via `go tool goda` at
-// exec time) is required because dirToDot runs goda with cmd.Dir set to a
-// cloned target repo, whose go.mod does not declare goda as a tool.
-var (
-	godaOnce sync.Once
-	godaPath string
-	godaErr  error
-)
-
-func godaBin() (string, error) {
-	godaOnce.Do(func() {
-		out, err := exec.Command("go", "tool", "-n", "goda").Output()
-		if err != nil {
-			godaErr = fmt.Errorf("failed to resolve goda tool: %w", err)
-			return
-		}
-		godaPath = strings.TrimSpace(string(out))
-	})
-	return godaPath, godaErr
-}
 
 func repoToDot(repo string, cluster bool) (string, error) {
 	codeDir, err := toDir(repo)
@@ -55,19 +32,13 @@ func repoToDot(repo string, cluster bool) (string, error) {
 }
 
 func dirToDot(dir string, cluster bool) (string, error) {
-	goda, err := godaBin()
-	if err != nil {
-		log.Error(err)
-		return "", err
-	}
-
 	args := []string{"graph", "-short"}
 	if cluster {
 		args = append(args, "-cluster")
 	}
 	args = append(args, "./...")
 
-	cmd := exec.Command(goda, args...)
+	cmd := exec.Command("goda", args...)
 	cmd.Dir = dir
 
 	var stdout, stderr bytes.Buffer
@@ -75,7 +46,7 @@ func dirToDot(dir string, cluster bool) (string, error) {
 	cmd.Stderr = &stderr
 
 	log.Debugf("running goda: %s", cmd)
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		log.Errorf("goda cmd failed [%s]: %s", err, stderr.String())
 		return "", err
