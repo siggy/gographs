@@ -6,11 +6,14 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
+	gogit "github.com/go-git/go-git/v5"
+	gogitclient "github.com/go-git/go-git/v5/plumbing/transport/client"
+	gogithttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"golang.org/x/net/html"
 )
 
@@ -122,30 +125,35 @@ func blockPrivate(network, address string, _ syscall.RawConn) error {
 	return nil
 }
 
-// gitClone shallow-clones cloneURL into dir, fetching the minimum data needed
-// for a buildable tree.
+// installHTTPOnce registers the SSRF-protected HTTP client with go-git once.
+var installHTTPOnce sync.Once
+
+// gitClone shallow-clones cloneURL into dir using pure-Go git (no git binary required).
 func gitClone(cloneURL, dir string) error {
-	cmd := exec.Command("git", "clone",
-		"--depth", "1", // no history
-		"--single-branch",   // default branch only
-		"--no-tags",         // skip tags
-		"--", cloneURL, dir, // -- stops URL-as-flag injection
-	)
-	cmd.Env = append(os.Environ(),
-		"GIT_TERMINAL_PROMPT=0",    // never prompt for credentials
-		"GIT_ALLOW_PROTOCOL=https", // refuse file://, ext::, ssh, etc.
-	)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("git clone failed: %w: %s", err, out)
+	installHTTPOnce.Do(func() {
+		gogitclient.InstallProtocol("https", gogithttp.NewClient(&http.Client{
+			Transport: &http.Transport{
+				DialContext: (&net.Dialer{Control: blockPrivate}).DialContext,
+			},
+		}))
+	})
+
+	_, err := gogit.PlainClone(dir, false, &gogit.CloneOptions{
+		URL:          cloneURL,
+		Depth:        1,
+		SingleBranch: true,
+		Tags:         gogit.NoTags,
+	})
+	if err != nil {
+		return fmt.Errorf("git clone failed: %w", err)
 	}
 	return nil
 }
 
 // trimScheme strips a leading scheme (e.g. "https://") from a repo path.
 func trimScheme(repo string) string {
-	schemeSep := "://"
-	if i := strings.Index(repo, schemeSep); i > -1 {
-		return repo[i+len(schemeSep):]
+	if _, after, ok := strings.Cut(repo, "://"); ok {
+		return after
 	}
 	return repo
 }
