@@ -40,7 +40,7 @@ linters:
           - github.com/prometheus/client_golang
           - github.com/sirupsen/logrus
           - github.com/valkey-io/valkey-go
-          - golang.org/x/tools/go/vcs
+          - golang.org/x/net/html
   exclusions:
     generated: lax
     paths:

@@ -7,7 +7,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/sirupsen/logrus v1.9.4
 	github.com/valkey-io/valkey-go v1.0.76
-	golang.org/x/tools/go/vcs v0.1.0-deprecated
+	golang.org/x/net v0.56.0
 )
 
 require (

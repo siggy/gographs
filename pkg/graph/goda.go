@@ -15,13 +15,11 @@ package graph
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/tools/go/vcs"
 )
 
 // godaOnce resolves the goda tool binary once, from the gographs module's
@@ -54,36 +52,6 @@ func repoToDot(repo string, cluster bool) (string, error) {
 	}
 
 	return dirToDot(codeDir, cluster)
-}
-
-func toDir(repo string) (string, error) {
-	codeDir, err := os.MkdirTemp("", "")
-	if err != nil {
-		log.Errorf("TempDir err: %s", err)
-		return "", err
-	}
-	log.Debugf("writing to tempDir: %s", codeDir)
-	err = os.MkdirAll(codeDir, os.ModePerm)
-	if err != nil {
-		log.Errorf("MkdirAll err: %s", err)
-		return "", err
-	}
-
-	vcs.ShowCmd = true
-	root, err := vcs.RepoRootForImportPath(trimScheme(repo), true)
-	if err != nil {
-		log.Errorf("RepoRootForImportPath err: %s", err)
-		return "", err
-	}
-
-	root.VCS.CreateCmd = "clone --depth 1 --no-tags {repo} {dir}"
-	err = root.VCS.Create(codeDir, root.Repo)
-	if err != nil {
-		log.Errorf("cmd.Create err: %s", err)
-		return "", err
-	}
-
-	return codeDir, nil
 }
 
 func dirToDot(dir string, cluster bool) (string, error) {
@@ -121,14 +89,4 @@ func dirToDot(dir string, cluster bool) (string, error) {
 	}
 
 	return stdout.String(), nil
-}
-
-func trimScheme(repo string) string {
-	schemeSep := "://"
-	schemeSepIdx := strings.Index(repo, schemeSep)
-	if schemeSepIdx > -1 {
-		return repo[schemeSepIdx+len(schemeSep):]
-	}
-
-	return repo
 }
