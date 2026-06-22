@@ -1,15 +1,16 @@
 package cache
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
+	"github.com/valkey-io/valkey-go"
 )
 
-// Cache holds Redis client and log state.
+// Cache holds Valkey client and log state.
 type Cache struct {
-	client *redis.Client
+	client valkey.Client
 	log    *log.Entry
 }
 
@@ -35,11 +36,16 @@ const (
 
 // New initializes a new cache client.
 func New(addr string) (*Cache, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr: addr,
+	client, err := valkey.NewClient(valkey.ClientOption{
+		InitAddress: []string{addr},
 	})
+	if err != nil {
+		return nil, err
+	}
 
-	_, err := client.Ping(client.Context()).Result()
+	ctx := context.Background()
+
+	err = client.Do(ctx, client.B().Ping().Build()).Error()
 	if err != nil {
 		return nil, err
 	}
@@ -110,37 +116,42 @@ func (c *Cache) GetDOT(repo string, cluster bool) (string, error) {
 
 // RepoScoreIncr increments the popularity score for a repo.
 func (c *Cache) RepoScoreIncr(repo string) {
-	c.client.ZIncrBy(c.client.Context(), repoScores, 1, repo)
+	c.client.Do(
+		context.Background(),
+		c.client.B().Zincrby().Key(repoScores).Increment(1).Member(repo).Build(),
+	)
 }
 
 // RepoScores returns the top-10 most popular repos
 func (c *Cache) RepoScores() ([]string, error) {
-	cmd := c.client.ZRevRangeByScore(c.client.Context(), repoScores, &redis.ZRangeBy{
-		Min:    "0",
-		Max:    "+inf",
-		Offset: 0,
-		Count:  1000,
-	})
-	if cmd.Err() != nil {
-		return nil, cmd.Err()
-	}
-
-	return cmd.Val(), nil
+	return c.client.Do(
+		context.Background(),
+		c.client.B().Zrevrangebyscore().Key(repoScores).
+			Max("+inf").Min("0").Limit(0, 1000).Build(),
+	).AsStrSlice()
 }
 
 func (c *Cache) hget(key, field string) (string, error) {
 	c.log.Tracef("hget[%s,%s]", key, field)
-	return c.client.HGet(c.client.Context(), key, field).Result()
+	return c.client.Do(
+		context.Background(), c.client.B().Hget().Key(key).Field(field).Build(),
+	).ToString()
 }
 
-func (c *Cache) hset(key, field string, value interface{}) error {
+func (c *Cache) hset(key, field string, value string) error {
 	c.log.Tracef("hset[%s,%s]", key, field)
-	return c.client.HSet(c.client.Context(), key, field, value).Err()
+	return c.client.Do(
+		context.Background(),
+		c.client.B().Hset().Key(key).FieldValue().FieldValue(field, value).Build(),
+	).Error()
 }
 
 func (c *Cache) hdel(key, field string) (int64, error) {
 	c.log.Debugf("hdel[%s,%s]", key, field)
-	return c.client.HDel(c.client.Context(), key, field).Result()
+	return c.client.Do(
+		context.Background(),
+		c.client.B().Hdel().Key(key).Field(field).Build(),
+	).AsInt64()
 }
 
 func repoKey(repo string, cluster bool) string {

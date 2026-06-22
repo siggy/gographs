@@ -1,31 +1,39 @@
 package cache
 
 import (
-	"github.com/go-redis/redis/v8"
+	"context"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/valkey-io/valkey-go"
 )
 
-func registerGauges(client *redis.Client) {
+func registerGauges(client valkey.Client) {
 	registerHashGauge(client, dotHash)
 	registerHashGauge(client, svgHash)
 	registerSetGauge(client, repoScores)
 }
 
-func registerHashGauge(client *redis.Client, key string) {
+func registerHashGauge(client valkey.Client, key string) {
 	registerGauge(
 		func() float64 {
-			size, _ := client.HLen(client.Context(), key).Result()
+			size, _ := client.Do(
+				context.Background(),
+				client.B().Hlen().Key(key).Build(),
+			).AsInt64()
 			return float64(size)
 		},
 		key,
 	)
 }
 
-func registerSetGauge(client *redis.Client, key string) {
+func registerSetGauge(client valkey.Client, key string) {
 	registerGauge(
 		func() float64 {
-			size, _ := client.ZCount(client.Context(), key, "-inf", "+inf").Result()
+			size, _ := client.Do(
+				context.Background(),
+				client.B().Zcount().Key(key).Min("-inf").Max("+inf").Build(),
+			).AsInt64()
 			return float64(size)
 		},
 		key,

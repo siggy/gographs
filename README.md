@@ -33,10 +33,10 @@ Example
 ### First-time setup
 
 ```bash
-go install github.com/loov/goda@v0.4.3
-brew install dot # or equivalent
-brew install redis # or equivalent
-redis-server /usr/local/etc/redis.conf
+go get -tool github.com/loov/goda@v0.9.3
+brew install graphviz # or equivalent
+brew install valkey # or equivalent
+valkey-cli ping
 ```
 
 ### Boot server
